@@ -455,7 +455,7 @@
     "isEntry": true
   },
   "resources/js/app.ts": {
-    "file": "assets/app-Cc82kz-j.js",
+    "file": "assets/app-BuZDKS1j.js",
     "name": "app",
     "src": "resources/js/app.ts",
     "isEntry": true,
@@ -664,7 +664,7 @@
     ]
   },
   "resources/js/pages/ProductionBatches/Index.vue": {
-    "file": "assets/Index-BM37_Kem.js",
+    "file": "assets/Index-DEjbO1BI.js",
     "name": "Index",
     "src": "resources/js/pages/ProductionBatches/Index.vue",
     "isDynamicEntry": true,
@@ -691,7 +691,7 @@
     ]
   },
   "resources/js/pages/ProductionBatches/Show.vue": {
-    "file": "assets/Show-CTNWEBiN.js",
+    "file": "assets/Show-B6YNMLx0.js",
     "name": "Show",
     "src": "resources/js/pages/ProductionBatches/Show.vue",
     "isDynamicEntry": true,

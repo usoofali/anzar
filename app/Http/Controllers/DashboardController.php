@@ -29,12 +29,9 @@ class DashboardController extends Controller
         // Deliveries & Collections Today
         $bagsDeliveredToday = Delivery::whereDate('delivery_date', $today)->sum('bags_delivered');
 
-        $dailyCashToday = DailyCollection::whereDate('collection_date', $today)->sum('cash_amount')
-            + DebtPayment::whereDate('payment_date', $today)->where('payment_method', 'cash')->sum('amount')
-            + Delivery::whereDate('delivery_date', $today)->sum('paid_amount');
+        $dailyCashToday = DailyCollection::whereDate('collection_date', $today)->sum('cash_amount');
 
-        $dailyTransferToday = DailyCollection::whereDate('collection_date', $today)->sum('transfer_amount')
-            + DebtPayment::whereDate('payment_date', $today)->where('payment_method', 'transfer')->sum('amount');
+        $dailyTransferToday = DailyCollection::whereDate('collection_date', $today)->sum('transfer_amount');
 
         $totalOutstandingCredit = CustomerDebt::where('status', 'open')->sum('outstanding_amount');
         $customersOwingCount = CustomerDebt::where('status', 'open')->distinct('customer_id')->count('customer_id');

@@ -87,19 +87,12 @@ class ProductionBatch extends Model
 
     public function getCashCollectedAttribute(): float
     {
-        $directCash = (float) $this->dailyCollections()->sum('cash_amount');
-        $debtCash = (float) $this->debtPayments()->where('payment_method', 'cash')->sum('amount');
-        $upfrontCash = (float) $this->deliveries()->sum('paid_amount'); // upfront payment on deliveries
-
-        return $directCash + $debtCash + $upfrontCash;
+        return (float) $this->dailyCollections()->sum('cash_amount');
     }
 
     public function getTransferCollectedAttribute(): float
     {
-        $directTransfer = (float) $this->dailyCollections()->sum('transfer_amount');
-        $debtTransfer = (float) $this->debtPayments()->where('payment_method', 'transfer')->sum('amount');
-
-        return $directTransfer + $debtTransfer;
+        return (float) $this->dailyCollections()->sum('transfer_amount');
     }
 
     public function getTotalCollectedAttribute(): float
