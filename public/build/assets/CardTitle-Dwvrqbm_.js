@@ -1,1 +1,0 @@
-import{Wt as e,X as t,Zt as n,at as r,ir as i,sr as a}from"./dist-DWQTCocZ.js";import{a as o}from"./button-DhVxqs-y.js";var s=r({__name:`CardTitle`,props:{class:{type:[Boolean,null,String,Object,Array]}},setup(r){let s=r;return(r,c)=>(e(),t(`h3`,{"data-slot":`card-title`,class:a(i(o)(`leading-none font-semibold`,s.class))},[n(r.$slots,`default`)],2))}});export{s as t};
