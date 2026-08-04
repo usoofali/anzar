@@ -2,8 +2,10 @@
 import { computed, ref } from 'vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { Boxes, Plus, Search, Trash2 } from '@lucide/vue';
+import { toast } from 'vue-sonner';
 import ConfirmModal from '@/components/ui/ConfirmModal.vue';
 import EmptyState from '@/components/ui/EmptyState.vue';
+import Pagination from '@/components/ui/Pagination.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import {
@@ -42,6 +44,9 @@ interface Props {
     purchases: {
         data: PurchaseItem[];
         links: any[];
+        from?: number;
+        to?: number;
+        total?: number;
     };
     filters: {
         search?: string;
@@ -132,13 +137,13 @@ const formatMoney = (amount: number) => {
         <!-- Search & Table Card -->
         <Card>
             <CardHeader class="pb-3">
-                <div class="flex items-center justify-between gap-4">
-                    <div class="relative flex-1 max-w-md">
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+                    <div class="relative w-full sm:max-w-md">
                         <Search class="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
                             v-model="search"
                             placeholder="Search purchase no..."
-                            class="pl-9"
+                            class="pl-9 w-full"
                             @keyup.enter="handleSearch"
                         />
                     </div>
@@ -154,40 +159,49 @@ const formatMoney = (amount: number) => {
                         @action="openModal"
                     />
                 </div>
-                <div v-else class="relative overflow-x-auto">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-muted/50 text-xs uppercase text-muted-foreground">
-                            <tr>
-                                <th class="px-4 py-3">Purchase No</th>
-                                <th class="px-4 py-3">Date</th>
-                                <th class="px-4 py-3 text-right">Quantity (KG)</th>
-                                <th class="px-4 py-3 text-right">Unit Price</th>
-                                <th class="px-4 py-3 text-right">Total Cost</th>
-                                <th class="px-4 py-3 text-center">Batch Linked</th>
-                                <th class="px-4 py-3 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y">
-                            <tr v-for="p in purchases.data" :key="p.id" class="hover:bg-muted/30">
-                                <td class="px-4 py-3 font-mono text-xs font-semibold text-blue-600">{{ p.purchase_no }}</td>
-                                <td class="px-4 py-3 text-muted-foreground">{{ formatDate(p.purchase_date) }}</td>
-                                <td class="px-4 py-3 text-right font-bold text-foreground">{{ p.quantity_kg }} KG</td>
-                                <td class="px-4 py-3 text-right text-muted-foreground">{{ formatMoney(p.unit_price) }}</td>
-                                <td class="px-4 py-3 text-right font-semibold text-emerald-600">{{ formatMoney(p.total_cost) }}</td>
-                                <td class="px-4 py-3 text-center">
-                                    <span v-if="p.production_batch" class="inline-flex items-center rounded-md bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-950/50 dark:text-blue-300">
-                                        {{ p.production_batch.batch_no }}
-                                    </span>
-                                    <span v-else class="text-xs text-muted-foreground">Unassigned</span>
-                                </td>
-                                <td class="px-4 py-3 text-right">
-                                    <Button variant="ghost" size="sm" class="h-8 px-2 text-xs text-rose-600 hover:text-rose-700" @click="openDeleteModal(p)">
-                                        <Trash2 class="h-3.5 w-3.5" />
-                                    </Button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div v-else>
+                    <div class="relative overflow-x-auto rounded-md border border-border/40">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-muted/50 text-xs uppercase text-muted-foreground">
+                                <tr>
+                                    <th class="px-4 py-3">Purchase No</th>
+                                    <th class="px-4 py-3">Date</th>
+                                    <th class="px-4 py-3 text-right">Quantity (KG)</th>
+                                    <th class="px-4 py-3 text-right">Unit Price</th>
+                                    <th class="px-4 py-3 text-right">Total Cost</th>
+                                    <th class="px-4 py-3 text-center">Batch Linked</th>
+                                    <th class="px-4 py-3 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-border/40">
+                                <tr v-for="p in purchases.data" :key="p.id" class="hover:bg-muted/30">
+                                    <td class="px-4 py-3 font-mono text-xs font-semibold text-blue-600 dark:text-blue-400 whitespace-nowrap">{{ p.purchase_no }}</td>
+                                    <td class="px-4 py-3 text-muted-foreground whitespace-nowrap">{{ formatDate(p.purchase_date) }}</td>
+                                    <td class="px-4 py-3 text-right font-bold text-foreground whitespace-nowrap">{{ p.quantity_kg }} KG</td>
+                                    <td class="px-4 py-3 text-right text-muted-foreground whitespace-nowrap">{{ formatMoney(p.unit_price) }}</td>
+                                    <td class="px-4 py-3 text-right font-semibold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">{{ formatMoney(p.total_cost) }}</td>
+                                    <td class="px-4 py-3 text-center whitespace-nowrap">
+                                        <span v-if="p.production_batch" class="inline-flex items-center rounded-md bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-950/50 dark:text-blue-300 border border-blue-200/50 dark:border-blue-800/40">
+                                            {{ p.production_batch.batch_no }}
+                                        </span>
+                                        <span v-else class="text-xs text-muted-foreground">Unassigned</span>
+                                    </td>
+                                    <td class="px-4 py-3 text-right whitespace-nowrap">
+                                        <Button variant="ghost" size="sm" class="h-8 px-2 text-xs text-rose-600 hover:text-rose-700" @click="openDeleteModal(p)">
+                                            <Trash2 class="h-3.5 w-3.5" />
+                                        </Button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <Pagination
+                        :links="purchases.links"
+                        :from="purchases.from"
+                        :to="purchases.to"
+                        :total="purchases.total"
+                        class="mt-4"
+                    />
                 </div>
             </CardContent>
         </Card>

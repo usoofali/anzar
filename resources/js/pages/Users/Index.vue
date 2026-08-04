@@ -6,6 +6,7 @@ import { toast } from 'vue-sonner';
 import StatusBadge from '@/components/ui/StatusBadge.vue';
 import ConfirmModal from '@/components/ui/ConfirmModal.vue';
 import EmptyState from '@/components/ui/EmptyState.vue';
+import Pagination from '@/components/ui/Pagination.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -39,6 +40,9 @@ interface Props {
     users: {
         data: UserItem[];
         links: any[];
+        from?: number;
+        to?: number;
+        total?: number;
     };
     filters: {
         search?: string;
@@ -191,13 +195,13 @@ const roleLabel = (role: string) => {
         <!-- Search Bar & Filters -->
         <Card>
             <CardHeader class="pb-3">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div class="relative flex-1 max-w-md">
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+                    <div class="relative w-full sm:max-w-md">
                         <Search class="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
                             v-model="search"
                             placeholder="Search by name, email, username..."
-                            class="pl-9"
+                            class="pl-9 w-full"
                             @keyup.enter="handleSearch"
                         />
                     </div>
@@ -213,48 +217,57 @@ const roleLabel = (role: string) => {
                         @action="openCreateModal"
                     />
                 </div>
-                <div v-else class="relative overflow-x-auto">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-muted/50 text-xs uppercase text-muted-foreground">
-                            <tr>
-                                <th class="px-4 py-3">Name</th>
-                                <th class="px-4 py-3">Username / Email</th>
-                                <th class="px-4 py-3">Phone</th>
-                                <th class="px-4 py-3">Role</th>
-                                <th class="px-4 py-3">Status</th>
-                                <th class="px-4 py-3 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y">
-                            <tr v-for="u in users.data" :key="u.id" class="hover:bg-muted/30">
-                                <td class="px-4 py-3 font-semibold text-foreground">{{ u.name }}</td>
-                                <td class="px-4 py-3">
-                                    <div class="text-xs font-mono font-medium text-foreground">{{ u.username || 'N/A' }}</div>
-                                    <div class="text-xs text-muted-foreground">{{ u.email }}</div>
-                                </td>
-                                <td class="px-4 py-3 text-xs text-muted-foreground">{{ u.phone || 'N/A' }}</td>
-                                <td class="px-4 py-3">
-                                    <span class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 dark:bg-blue-950/50 dark:text-blue-300">
-                                        {{ roleLabel(u.role) }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-3">
-                                    <StatusBadge :status="u.status" />
-                                </td>
-                                <td class="px-4 py-3 text-right space-x-2">
-                                    <Button variant="outline" size="sm" class="h-8 px-2 text-xs" @click="openEditModal(u)">
-                                        Edit
-                                    </Button>
-                                    <Button variant="outline" size="sm" class="h-8 px-2 text-xs text-amber-600 hover:text-amber-700" @click="openResetModal(u.id)">
-                                        <KeyRound class="h-3.5 w-3.5" />
-                                    </Button>
-                                    <Button variant="ghost" size="sm" class="h-8 px-2 text-xs text-rose-600 hover:text-rose-700" @click="openDeleteModal(u)">
-                                        <Trash2 class="h-3.5 w-3.5" />
-                                    </Button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div v-else>
+                    <div class="relative overflow-x-auto rounded-md border border-border/40">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-muted/50 text-xs uppercase text-muted-foreground">
+                                <tr>
+                                    <th class="px-4 py-3">Name</th>
+                                    <th class="px-4 py-3">Username / Email</th>
+                                    <th class="px-4 py-3">Phone</th>
+                                    <th class="px-4 py-3">Role</th>
+                                    <th class="px-4 py-3">Status</th>
+                                    <th class="px-4 py-3 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-border/40">
+                                <tr v-for="u in users.data" :key="u.id" class="hover:bg-muted/30">
+                                    <td class="px-4 py-3 font-semibold text-foreground whitespace-nowrap">{{ u.name }}</td>
+                                    <td class="px-4 py-3 whitespace-nowrap">
+                                        <div class="text-xs font-mono font-medium text-foreground">{{ u.username || 'N/A' }}</div>
+                                        <div class="text-xs text-muted-foreground">{{ u.email }}</div>
+                                    </td>
+                                    <td class="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">{{ u.phone || 'N/A' }}</td>
+                                    <td class="px-4 py-3 whitespace-nowrap">
+                                        <span class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 dark:bg-blue-950/50 dark:text-blue-300 border border-blue-200/50 dark:border-blue-800/40">
+                                            {{ roleLabel(u.role) }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3 whitespace-nowrap">
+                                        <StatusBadge :status="u.status" />
+                                    </td>
+                                    <td class="px-4 py-3 text-right whitespace-nowrap space-x-2">
+                                        <Button variant="outline" size="sm" class="h-8 px-2 text-xs" @click="openEditModal(u)">
+                                            Edit
+                                        </Button>
+                                        <Button variant="outline" size="sm" class="h-8 px-2 text-xs text-amber-600 dark:text-amber-400 hover:text-amber-700" @click="openResetModal(u.id)">
+                                            <KeyRound class="h-3.5 w-3.5" />
+                                        </Button>
+                                        <Button variant="ghost" size="sm" class="h-8 px-2 text-xs text-rose-600 hover:text-rose-700" @click="openDeleteModal(u)">
+                                            <Trash2 class="h-3.5 w-3.5" />
+                                        </Button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <Pagination
+                        :links="users.links"
+                        :from="users.from"
+                        :to="users.to"
+                        :total="users.total"
+                        class="mt-4"
+                    />
                 </div>
             </CardContent>
         </Card>

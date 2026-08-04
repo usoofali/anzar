@@ -31,6 +31,7 @@ class RawMaterialPurchaseController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
+            'supplier' => ['nullable', 'string'],
             'purchase_date' => ['required', 'date'],
             'quantity_kg' => ['required', 'numeric', 'min:0.01'],
             'unit_price' => ['required', 'numeric', 'min:0'],

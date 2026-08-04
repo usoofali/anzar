@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { dashboard, login } from '@/routes';
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
@@ -16,12 +17,16 @@ import {
     Receipt,
     UserCheck,
     Layers,
-    Award
+    Award,
+    Menu,
+    X
 } from '@lucide/vue';
+
+const mobileMenuOpen = ref(false);
 </script>
 
 <template>
-    <Head title="Anzar Table Water - Pure & Refreshing Premium Drinking Water">
+    <Head title="Anzar - Pure & Refreshing Premium Drinking Water">
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -34,47 +39,93 @@ import {
         <div class="absolute bottom-10 left-1/3 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[160px] pointer-events-none"></div>
 
         <!-- Navigation Bar -->
-        <header class="relative z-50 border-b border-slate-800/80 bg-slate-950/70 backdrop-blur-xl sticky top-0">
-            <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-                <!-- Logo -->
-                <Link href="/" class="flex items-center gap-3 group">
-                    <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-tr from-cyan-600 to-sky-400 text-white shadow-lg shadow-cyan-500/25 group-hover:scale-105 transition-all duration-300">
-                        <AppLogoIcon class="size-6 text-white" />
+        <header class="relative z-50 border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl sticky top-0">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
+                <!-- Logo & Brand Name -->
+                <Link href="/" class="flex items-center gap-2.5 sm:gap-3 group shrink-0">
+                    <div class="flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-xl bg-gradient-to-tr from-cyan-600 to-sky-400 text-white shadow-lg shadow-cyan-500/25 group-hover:scale-105 transition-all duration-300">
+                        <AppLogoIcon class="size-5 sm:size-6 text-white" />
                     </div>
                     <div>
-                        <span class="text-xl font-bold tracking-tight text-white block leading-none">Anzar Table Water</span>
-                        <span class="text-xs text-cyan-400 font-medium tracking-wide">Pure & Premium Hydration</span>
+                        <span class="text-lg sm:text-xl font-bold tracking-tight text-white block leading-none">Anzar</span>
+                        <span class="text-[10px] sm:text-xs text-cyan-400 font-medium tracking-wide">Pure & Premium Hydration</span>
                     </div>
                 </Link>
 
-                <!-- Navigation Links -->
+                <!-- Navigation Links (Desktop) -->
                 <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
                     <a href="#about" class="hover:text-cyan-400 transition-colors">Quality Assurance</a>
                     <a href="#products" class="hover:text-cyan-400 transition-colors">Product Line</a>
                     <a href="#features" class="hover:text-cyan-400 transition-colors">Factory Systems</a>
                 </nav>
 
-                <!-- Auth Buttons (Only Login / Go to Dashboard) -->
-                <div class="flex items-center gap-4">
+                <!-- Auth Buttons & Mobile Menu Toggle -->
+                <div class="flex items-center gap-2 sm:gap-4">
                     <Link
                         v-if="$page.props.auth?.user"
                         :href="dashboard()"
-                        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-sky-500 text-white text-sm font-semibold shadow-lg shadow-cyan-600/30 hover:shadow-cyan-500/40 hover:from-cyan-500 hover:to-sky-400 transition-all duration-200"
+                        class="inline-flex items-center gap-1.5 sm:gap-2 px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-sky-500 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-cyan-600/30 hover:shadow-cyan-500/40 hover:from-cyan-500 hover:to-sky-400 transition-all duration-200"
                     >
-                        <span>Go to Dashboard</span>
-                        <ArrowRight class="w-4 h-4" />
+                        <span class="hidden sm:inline">Go to Dashboard</span>
+                        <span class="sm:hidden">Dashboard</span>
+                        <ArrowRight class="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </Link>
 
                     <Link
                         v-else
                         :href="login()"
-                        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-sky-500 text-white text-sm font-semibold shadow-lg shadow-cyan-600/30 hover:shadow-cyan-500/40 hover:from-cyan-500 hover:to-sky-400 transition-all duration-200"
+                        class="inline-flex items-center gap-1.5 sm:gap-2 px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-sky-500 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-cyan-600/30 hover:shadow-cyan-500/40 hover:from-cyan-500 hover:to-sky-400 transition-all duration-200"
                     >
-                        <UserCheck class="w-4 h-4" />
-                        <span>Portal Sign In</span>
+                        <UserCheck class="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        <span>Sign In</span>
                     </Link>
+
+                    <!-- Mobile Hamburger Button -->
+                    <button
+                        @click="mobileMenuOpen = !mobileMenuOpen"
+                        type="button"
+                        class="md:hidden p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                        aria-label="Toggle navigation menu"
+                    >
+                        <Menu v-if="!mobileMenuOpen" class="w-5 h-5" />
+                        <X v-else class="w-5 h-5" />
+                    </button>
                 </div>
             </div>
+
+            <!-- Mobile Dropdown Menu -->
+            <transition
+                enter-active-class="transition duration-200 ease-out"
+                enter-from-class="opacity-0 -translate-y-2"
+                enter-to-class="opacity-100 translate-y-0"
+                leave-active-class="transition duration-150 ease-in"
+                leave-from-class="opacity-100 translate-y-0"
+                leave-to-class="opacity-0 -translate-y-2"
+            >
+                <div v-if="mobileMenuOpen" class="md:hidden border-t border-slate-800/80 bg-slate-950/95 backdrop-blur-2xl px-4 py-4 space-y-3">
+                    <a
+                        href="#about"
+                        @click="mobileMenuOpen = false"
+                        class="block px-3 py-2 rounded-lg text-base font-medium text-slate-200 hover:text-cyan-400 hover:bg-slate-900/60 transition-colors"
+                    >
+                        Quality Assurance
+                    </a>
+                    <a
+                        href="#products"
+                        @click="mobileMenuOpen = false"
+                        class="block px-3 py-2 rounded-lg text-base font-medium text-slate-200 hover:text-cyan-400 hover:bg-slate-900/60 transition-colors"
+                    >
+                        Product Line
+                    </a>
+                    <a
+                        href="#features"
+                        @click="mobileMenuOpen = false"
+                        class="block px-3 py-2 rounded-lg text-base font-medium text-slate-200 hover:text-cyan-400 hover:bg-slate-900/60 transition-colors"
+                    >
+                        Factory Systems
+                    </a>
+                </div>
+            </transition>
         </header>
 
         <!-- Hero Section -->

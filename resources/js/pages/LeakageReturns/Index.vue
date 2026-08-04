@@ -5,6 +5,7 @@ import { Droplet, Plus, Search, Trash2 } from '@lucide/vue';
 import { toast } from 'vue-sonner';
 import ConfirmModal from '@/components/ui/ConfirmModal.vue';
 import EmptyState from '@/components/ui/EmptyState.vue';
+import Pagination from '@/components/ui/Pagination.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -47,6 +48,9 @@ interface Props {
     leakageReturns: {
         data: LeakageItem[];
         links: any[];
+        from?: number;
+        to?: number;
+        total?: number;
     };
     recentDeliveries: DeliveryOption[];
     filters: {
@@ -134,17 +138,19 @@ const confirmDelete = () => {
         <!-- Table & Search Card -->
         <Card>
             <CardHeader class="pb-3">
-                <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div class="relative flex-1 max-w-md w-full">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="relative w-full sm:max-w-xs">
                         <Search class="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
                             v-model="search"
                             placeholder="Search delivery, customer, batch..."
-                            class="pl-9"
+                            class="pl-9 w-full"
                             @keyup.enter="handleFilter"
                         />
                     </div>
-                    <Input type="date" v-model="dateFilter" class="w-auto text-sm" @change="handleFilter" />
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+                        <Input type="date" v-model="dateFilter" class="w-full sm:w-auto text-sm" @change="handleFilter" />
+                    </div>
                 </div>
             </CardHeader>
             <CardContent>
@@ -157,37 +163,46 @@ const confirmDelete = () => {
                         @action="openModal"
                     />
                 </div>
-                <div v-else class="relative overflow-x-auto">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-muted/50 text-xs uppercase text-muted-foreground">
-                            <tr>
-                                <th class="px-4 py-3">Date</th>
-                                <th class="px-4 py-3">Customer Shop</th>
-                                <th class="px-4 py-3">Batch</th>
-                                <th class="px-4 py-3">Delivery No</th>
-                                <th class="px-4 py-3 text-right">Returned (Pieces)</th>
-                                <th class="px-4 py-3 text-right">Replacement Issued</th>
-                                <th class="px-4 py-3">Remarks</th>
-                                <th class="px-4 py-3 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y">
-                            <tr v-for="lr in leakageReturns.data" :key="lr.id" class="hover:bg-muted/30">
-                                <td class="px-4 py-3 text-muted-foreground">{{ formatDate(lr.date) }}</td>
-                                <td class="px-4 py-3 font-semibold text-foreground">{{ lr.customer?.shop_name }}</td>
-                                <td class="px-4 py-3 font-medium text-blue-600">{{ lr.batch?.batch_no }}</td>
-                                <td class="px-4 py-3 font-mono text-xs text-muted-foreground">{{ lr.delivery?.delivery_no }}</td>
-                                <td class="px-4 py-3 text-right font-bold text-rose-600">{{ lr.returned_pieces }} Pcs</td>
-                                <td class="px-4 py-3 text-right font-bold text-blue-600">{{ lr.replacement_issued }} Pcs</td>
-                                <td class="px-4 py-3 text-xs text-muted-foreground max-w-xs truncate">{{ lr.remarks || 'N/A' }}</td>
-                                <td class="px-4 py-3 text-right">
-                                    <Button variant="ghost" size="sm" class="h-8 px-2 text-xs text-rose-600 hover:text-rose-700" @click="openDeleteModal(lr)">
-                                        <Trash2 class="h-3.5 w-3.5" />
-                                    </Button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div v-else>
+                    <div class="relative overflow-x-auto rounded-md border border-border/40">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-muted/50 text-xs uppercase text-muted-foreground">
+                                <tr>
+                                    <th class="px-4 py-3">Date</th>
+                                    <th class="px-4 py-3">Customer Shop</th>
+                                    <th class="px-4 py-3">Batch</th>
+                                    <th class="px-4 py-3">Delivery No</th>
+                                    <th class="px-4 py-3 text-right">Returned (Pieces)</th>
+                                    <th class="px-4 py-3 text-right">Replacement Issued</th>
+                                    <th class="px-4 py-3">Remarks</th>
+                                    <th class="px-4 py-3 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-border/40">
+                                <tr v-for="lr in leakageReturns.data" :key="lr.id" class="hover:bg-muted/30">
+                                    <td class="px-4 py-3 text-muted-foreground whitespace-nowrap">{{ formatDate(lr.date) }}</td>
+                                    <td class="px-4 py-3 font-semibold text-foreground whitespace-nowrap">{{ lr.customer?.shop_name }}</td>
+                                    <td class="px-4 py-3 font-medium text-blue-600 dark:text-blue-400 whitespace-nowrap">{{ lr.batch?.batch_no }}</td>
+                                    <td class="px-4 py-3 font-mono text-xs text-muted-foreground whitespace-nowrap">{{ lr.delivery?.delivery_no }}</td>
+                                    <td class="px-4 py-3 text-right font-bold text-rose-600 dark:text-rose-400 whitespace-nowrap">{{ lr.returned_pieces }} Pcs</td>
+                                    <td class="px-4 py-3 text-right font-bold text-blue-600 dark:text-blue-400 whitespace-nowrap">{{ lr.replacement_issued }} Pcs</td>
+                                    <td class="px-4 py-3 text-xs text-muted-foreground max-w-xs truncate">{{ lr.remarks || 'N/A' }}</td>
+                                    <td class="px-4 py-3 text-right whitespace-nowrap">
+                                        <Button variant="ghost" size="sm" class="h-8 px-2 text-xs text-rose-600 hover:text-rose-700" @click="openDeleteModal(lr)">
+                                            <Trash2 class="h-3.5 w-3.5" />
+                                        </Button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <Pagination
+                        :links="leakageReturns.links"
+                        :from="leakageReturns.from"
+                        :to="leakageReturns.to"
+                        :total="leakageReturns.total"
+                        class="mt-4"
+                    />
                 </div>
             </CardContent>
         </Card>

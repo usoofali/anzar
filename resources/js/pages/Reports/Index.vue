@@ -113,16 +113,16 @@ const formatMoney = (amount: number) => {
         </div>
 
         <!-- Screen Header -->
-        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between print:hidden">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between print:hidden">
             <div>
                 <h1 class="text-2xl font-bold tracking-tight text-foreground">Management Reports & Analytics</h1>
                 <p class="text-sm text-muted-foreground">Comprehensive batch lifecycle reports, revenue summaries, and accounting statements.</p>
             </div>
-            <div class="flex items-center gap-2">
-                <Button variant="outline" class="gap-1.5" @click="triggerPrint">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                <Button variant="outline" class="gap-1.5 w-full sm:w-auto" @click="triggerPrint">
                     <Printer class="h-4 w-4" /> Print / Export PDF
                 </Button>
-                <Button variant="secondary" class="gap-1.5" @click="exportCSV">
+                <Button variant="secondary" class="gap-1.5 w-full sm:w-auto" @click="exportCSV">
                     <Download class="h-4 w-4" /> Export CSV
                 </Button>
             </div>
@@ -141,7 +141,7 @@ const formatMoney = (amount: number) => {
                         v-for="rt in reportTypes"
                         :key="rt.id"
                         class="w-full text-left flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-xs font-medium transition-colors"
-                        :class="currentType === rt.id ? 'bg-blue-600 text-white font-semibold shadow-sm' : 'hover:bg-muted text-foreground'"
+                        :class="currentType === rt.id ? 'bg-cyan-600 dark:bg-cyan-500 text-white font-semibold shadow-sm' : 'hover:bg-muted text-foreground'"
                         @click="selectReportType(rt.id)"
                     >
                         <component :is="rt.icon" class="h-4 w-4 shrink-0" />
@@ -155,7 +155,7 @@ const formatMoney = (amount: number) => {
                 <!-- Filters Bar -->
                 <Card>
                     <CardContent class="pt-4">
-                        <form @submit.prevent="generateReport" class="grid gap-4 sm:grid-cols-4 items-end">
+                        <form @submit.prevent="generateReport" class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 items-end">
                             <div class="space-y-1">
                                 <Label for="start_date">Start Date</Label>
                                 <Input id="start_date" type="date" v-model="start_date" @change="generateReport" />
@@ -170,7 +170,7 @@ const formatMoney = (amount: number) => {
                                     id="customer_id"
                                     v-model="customer_id"
                                     @change="generateReport"
-                                    class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                                    class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring dark:bg-slate-900 dark:border-slate-800"
                                 >
                                     <option value="">All Customers</option>
                                     <option v-for="c in customers" :key="c.id" :value="c.id">{{ c.shop_name }}</option>
@@ -182,7 +182,7 @@ const formatMoney = (amount: number) => {
                                     id="batch_id"
                                     v-model="batch_id"
                                     @change="generateReport"
-                                    class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                                    class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring dark:bg-slate-900 dark:border-slate-800"
                                 >
                                     <option value="">All Batches</option>
                                     <option v-for="b in batches" :key="b.id" :value="b.id">{{ b.batch_no }}</option>

@@ -66,14 +66,14 @@ const formatMoney = (amount: number) => {
                 <h1 class="text-2xl font-bold tracking-tight text-foreground">Operational Overview</h1>
                 <p class="text-sm text-muted-foreground">Real-time production batch tracking, sales, debt collections, and quality control.</p>
             </div>
-            <div class="flex items-center gap-2">
-                <Link href="/production-batches">
-                    <Button class="gap-1.5 bg-blue-600 hover:bg-blue-700">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                <Link href="/production-batches" class="w-full sm:w-auto">
+                    <Button class="gap-1.5 bg-blue-600 hover:bg-blue-700 w-full sm:w-auto">
                         <Factory class="h-4 w-4" /> New Batch
                     </Button>
                 </Link>
-                <Link href="/deliveries">
-                    <Button variant="outline" class="gap-1.5">
+                <Link href="/deliveries" class="w-full sm:w-auto">
+                    <Button variant="outline" class="gap-1.5 w-full sm:w-auto">
                         <PackageCheck class="h-4 w-4" /> Record Delivery
                     </Button>
                 </Link>

@@ -5,6 +5,7 @@ import { PackageCheck, Plus, Search, Trash2 } from '@lucide/vue';
 import { toast } from 'vue-sonner';
 import ConfirmModal from '@/components/ui/ConfirmModal.vue';
 import EmptyState from '@/components/ui/EmptyState.vue';
+import Pagination from '@/components/ui/Pagination.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -53,6 +54,9 @@ interface Props {
     deliveries: {
         data: DeliveryItem[];
         links: any[];
+        from?: number;
+        to?: number;
+        total?: number;
     };
     activeBatches: BatchOption[];
     customers: CustomerOption[];
@@ -166,20 +170,20 @@ const formatMoney = (amount: number) => {
         <!-- Table & Filters Card -->
         <Card>
             <CardHeader class="pb-3">
-                <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div class="relative flex-1 max-w-md w-full">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="relative w-full sm:max-w-xs">
                         <Search class="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
                             v-model="search"
                             placeholder="Search delivery no, customer, batch..."
-                            class="pl-9"
+                            class="pl-9 w-full"
                             @keyup.enter="handleFilter"
                         />
                     </div>
-                    <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
                         <select
                             v-model="batchFilter"
-                            class="rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                            class="w-full sm:w-auto rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring dark:bg-slate-900 dark:border-slate-800"
                             @change="handleFilter"
                         >
                             <option value="">All Batches</option>
@@ -187,7 +191,7 @@ const formatMoney = (amount: number) => {
                         </select>
                         <select
                             v-model="customerFilter"
-                            class="rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                            class="w-full sm:w-auto rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring dark:bg-slate-900 dark:border-slate-800"
                             @change="handleFilter"
                         >
                             <option value="">All Customers</option>
@@ -206,43 +210,52 @@ const formatMoney = (amount: number) => {
                         @action="openCreateModal"
                     />
                 </div>
-                <div v-else class="relative overflow-x-auto">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-muted/50 text-xs uppercase text-muted-foreground">
-                            <tr>
-                                <th class="px-4 py-3">Delivery No</th>
-                                <th class="px-4 py-3">Date</th>
-                                <th class="px-4 py-3">Batch</th>
-                                <th class="px-4 py-3">Customer Shop</th>
-                                <th class="px-4 py-3 text-right">Bags</th>
-                                <th class="px-4 py-3 text-right">Unit Price</th>
-                                <th class="px-4 py-3 text-right">Total Amount</th>
-                                <th class="px-4 py-3 text-right">Paid Upfront</th>
-                                <th class="px-4 py-3 text-right">Credit / Debt</th>
-                                <th class="px-4 py-3 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y">
-                            <tr v-for="d in deliveries.data" :key="d.id" class="hover:bg-muted/30">
-                                <td class="px-4 py-3 font-mono text-xs font-semibold text-foreground">{{ d.delivery_no }}</td>
-                                <td class="px-4 py-3 text-muted-foreground">{{ formatDate(d.delivery_date) }}</td>
-                                <td class="px-4 py-3 font-medium text-blue-600">{{ d.batch?.batch_no }}</td>
-                                <td class="px-4 py-3 font-medium text-foreground">{{ d.customer?.shop_name }}</td>
-                                <td class="px-4 py-3 text-right font-bold text-foreground">{{ d.bags_delivered }}</td>
-                                <td class="px-4 py-3 text-right text-muted-foreground">{{ formatMoney(d.unit_price) }}</td>
-                                <td class="px-4 py-3 text-right font-bold text-foreground">{{ formatMoney(d.total_amount) }}</td>
-                                <td class="px-4 py-3 text-right font-semibold text-emerald-600">{{ formatMoney(d.paid_amount) }}</td>
-                                <td class="px-4 py-3 text-right font-semibold" :class="d.total_amount - d.paid_amount > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-muted-foreground'">
-                                    {{ formatMoney(d.total_amount - d.paid_amount) }}
-                                </td>
-                                <td class="px-4 py-3 text-right">
-                                    <Button variant="ghost" size="sm" class="h-8 px-2 text-xs text-rose-600 hover:text-rose-700" @click="openDeleteModal(d)">
-                                        <Trash2 class="h-3.5 w-3.5" />
-                                    </Button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div v-else>
+                    <div class="relative overflow-x-auto rounded-md border border-border/40">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-muted/50 text-xs uppercase text-muted-foreground">
+                                <tr>
+                                    <th class="px-4 py-3">Delivery No</th>
+                                    <th class="px-4 py-3">Date</th>
+                                    <th class="px-4 py-3">Batch</th>
+                                    <th class="px-4 py-3">Customer Shop</th>
+                                    <th class="px-4 py-3 text-right">Bags</th>
+                                    <th class="px-4 py-3 text-right">Unit Price</th>
+                                    <th class="px-4 py-3 text-right">Total Amount</th>
+                                    <th class="px-4 py-3 text-right">Paid Upfront</th>
+                                    <th class="px-4 py-3 text-right">Credit / Debt</th>
+                                    <th class="px-4 py-3 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-border/40">
+                                <tr v-for="d in deliveries.data" :key="d.id" class="hover:bg-muted/30">
+                                    <td class="px-4 py-3 font-mono text-xs font-semibold text-foreground whitespace-nowrap">{{ d.delivery_no }}</td>
+                                    <td class="px-4 py-3 text-muted-foreground whitespace-nowrap">{{ formatDate(d.delivery_date) }}</td>
+                                    <td class="px-4 py-3 font-medium text-blue-600 dark:text-blue-400 whitespace-nowrap">{{ d.batch?.batch_no }}</td>
+                                    <td class="px-4 py-3 font-medium text-foreground whitespace-nowrap">{{ d.customer?.shop_name }}</td>
+                                    <td class="px-4 py-3 text-right font-bold text-foreground whitespace-nowrap">{{ d.bags_delivered }}</td>
+                                    <td class="px-4 py-3 text-right text-muted-foreground whitespace-nowrap">{{ formatMoney(d.unit_price) }}</td>
+                                    <td class="px-4 py-3 text-right font-bold text-foreground whitespace-nowrap">{{ formatMoney(d.total_amount) }}</td>
+                                    <td class="px-4 py-3 text-right font-semibold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">{{ formatMoney(d.paid_amount) }}</td>
+                                    <td class="px-4 py-3 text-right font-semibold whitespace-nowrap" :class="d.total_amount - d.paid_amount > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-muted-foreground'">
+                                        {{ formatMoney(d.total_amount - d.paid_amount) }}
+                                    </td>
+                                    <td class="px-4 py-3 text-right whitespace-nowrap">
+                                        <Button variant="ghost" size="sm" class="h-8 px-2 text-xs text-rose-600 hover:text-rose-700" @click="openDeleteModal(d)">
+                                            <Trash2 class="h-3.5 w-3.5" />
+                                        </Button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <Pagination
+                        :links="deliveries.links"
+                        :from="deliveries.from"
+                        :to="deliveries.to"
+                        :total="deliveries.total"
+                        class="mt-4"
+                    />
                 </div>
             </CardContent>
         </Card>

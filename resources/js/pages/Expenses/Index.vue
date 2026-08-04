@@ -19,6 +19,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { formatDate } from '@/lib/utils';
 
+import Pagination from '@/components/ui/Pagination.vue';
+
 defineOptions({
     layout: {
         breadcrumbs: [{ title: 'Operational Expenses', href: '/expenses' }],
@@ -38,6 +40,9 @@ interface Props {
     expenses: {
         data: ExpenseItem[];
         links: any[];
+        from?: number;
+        to?: number;
+        total?: number;
     };
     categories: string[];
     filters: {
@@ -132,21 +137,21 @@ const formatMoney = (amount: number) => {
         <!-- Table & Search Card -->
         <Card>
             <CardHeader class="pb-3">
-                <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div class="relative flex-1 max-w-md w-full">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="relative w-full sm:max-w-xs">
                         <Search class="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
                             v-model="search"
                             placeholder="Search category, description..."
-                            class="pl-9"
+                            class="pl-9 w-full"
                             @keyup.enter="handleFilter"
                         />
                     </div>
-                    <div class="flex items-center gap-2 w-full sm:w-auto">
-                        <Input type="date" v-model="dateFilter" class="w-auto text-sm" @change="handleFilter" />
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+                        <Input type="date" v-model="dateFilter" class="w-full sm:w-auto text-sm" @change="handleFilter" />
                         <select
                             v-model="categoryFilter"
-                            class="rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                            class="w-full sm:w-auto rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring dark:bg-slate-900 dark:border-slate-800"
                             @change="handleFilter"
                         >
                             <option value="">All Categories</option>
@@ -165,37 +170,46 @@ const formatMoney = (amount: number) => {
                         @action="openModal"
                     />
                 </div>
-                <div v-else class="relative overflow-x-auto">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-muted/50 text-xs uppercase text-muted-foreground">
-                            <tr>
-                                <th class="px-4 py-3">Date</th>
-                                <th class="px-4 py-3">Category</th>
-                                <th class="px-4 py-3">Description</th>
-                                <th class="px-4 py-3 text-right">Amount</th>
-                                <th class="px-4 py-3">Recorded By</th>
-                                <th class="px-4 py-3 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y">
-                            <tr v-for="exp in expenses.data" :key="exp.id" class="hover:bg-muted/30">
-                                <td class="px-4 py-3 text-muted-foreground">{{ formatDate(exp.expense_date) }}</td>
-                                <td class="px-4 py-3">
-                                    <span class="inline-flex items-center rounded-md bg-purple-50 px-2 py-1 text-xs font-semibold text-purple-700 dark:bg-purple-950/50 dark:text-purple-300">
-                                        {{ exp.category }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-3 font-medium text-foreground">{{ exp.description }}</td>
-                                <td class="px-4 py-3 text-right font-bold text-rose-600 dark:text-rose-400">{{ formatMoney(exp.amount) }}</td>
-                                <td class="px-4 py-3 text-xs text-muted-foreground">{{ exp.recorded_by?.name || 'Staff' }}</td>
-                                <td class="px-4 py-3 text-right">
-                                    <Button variant="ghost" size="sm" class="h-8 px-2 text-xs text-rose-600 hover:text-rose-700" @click="openDeleteModal(exp)">
-                                        <Trash2 class="h-3.5 w-3.5" />
-                                    </Button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div v-else>
+                    <div class="relative overflow-x-auto rounded-md border border-border/40">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-muted/50 text-xs uppercase text-muted-foreground">
+                                <tr>
+                                    <th class="px-4 py-3">Date</th>
+                                    <th class="px-4 py-3">Category</th>
+                                    <th class="px-4 py-3">Description</th>
+                                    <th class="px-4 py-3 text-right">Amount</th>
+                                    <th class="px-4 py-3">Recorded By</th>
+                                    <th class="px-4 py-3 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-border/40">
+                                <tr v-for="exp in expenses.data" :key="exp.id" class="hover:bg-muted/30">
+                                    <td class="px-4 py-3 text-muted-foreground whitespace-nowrap">{{ formatDate(exp.expense_date) }}</td>
+                                    <td class="px-4 py-3 whitespace-nowrap">
+                                        <span class="inline-flex items-center rounded-md bg-purple-50 px-2 py-1 text-xs font-semibold text-purple-700 dark:bg-purple-950/50 dark:text-purple-300 border border-purple-200/50 dark:border-purple-800/40">
+                                            {{ exp.category }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3 font-medium text-foreground">{{ exp.description }}</td>
+                                    <td class="px-4 py-3 text-right font-bold text-rose-600 dark:text-rose-400 whitespace-nowrap">{{ formatMoney(exp.amount) }}</td>
+                                    <td class="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">{{ exp.recorded_by?.name || 'Staff' }}</td>
+                                    <td class="px-4 py-3 text-right whitespace-nowrap">
+                                        <Button variant="ghost" size="sm" class="h-8 px-2 text-xs text-rose-600 hover:text-rose-700" @click="openDeleteModal(exp)">
+                                            <Trash2 class="h-3.5 w-3.5" />
+                                        </Button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <Pagination
+                        :links="expenses.links"
+                        :from="expenses.from"
+                        :to="expenses.to"
+                        :total="expenses.total"
+                        class="mt-4"
+                    />
                 </div>
             </CardContent>
         </Card>

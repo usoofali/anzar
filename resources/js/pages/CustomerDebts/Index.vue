@@ -6,6 +6,7 @@ import { toast } from 'vue-sonner';
 import StatusBadge from '@/components/ui/StatusBadge.vue';
 import ConfirmModal from '@/components/ui/ConfirmModal.vue';
 import EmptyState from '@/components/ui/EmptyState.vue';
+import Pagination from '@/components/ui/Pagination.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -50,6 +51,9 @@ interface Props {
     debts: {
         data: DebtItem[];
         links: any[];
+        from?: number;
+        to?: number;
+        total?: number;
     };
     batches: BatchOption[];
     customers: CustomerOption[];
@@ -127,20 +131,20 @@ const formatMoney = (amount: number) => {
         <!-- Search & Filters -->
         <Card>
             <CardHeader class="pb-3">
-                <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div class="relative flex-1 max-w-md w-full">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="relative w-full sm:max-w-xs">
                         <Search class="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
                             v-model="search"
                             placeholder="Search customer shop or batch..."
-                            class="pl-9"
+                            class="pl-9 w-full"
                             @keyup.enter="handleFilter"
                         />
                     </div>
-                    <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
                         <select
                             v-model="statusFilter"
-                            class="rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                            class="w-full sm:w-auto rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring dark:bg-slate-900 dark:border-slate-800"
                             @change="handleFilter"
                         >
                             <option value="open">Open Debts</option>
@@ -149,7 +153,7 @@ const formatMoney = (amount: number) => {
                         </select>
                         <select
                             v-model="batchFilter"
-                            class="rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                            class="w-full sm:w-auto rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring dark:bg-slate-900 dark:border-slate-800"
                             @change="handleFilter"
                         >
                             <option value="">All Batches</option>
@@ -166,49 +170,58 @@ const formatMoney = (amount: number) => {
                         :icon="CreditCard"
                     />
                 </div>
-                <div v-else class="relative overflow-x-auto">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-muted/50 text-xs uppercase text-muted-foreground">
-                            <tr>
-                                <th class="px-4 py-3">Customer Shop</th>
-                                <th class="px-4 py-3">Batch</th>
-                                <th class="px-4 py-3">Delivery No</th>
-                                <th class="px-4 py-3 text-right">Original Delivery</th>
-                                <th class="px-4 py-3 text-right">Outstanding Debt</th>
-                                <th class="px-4 py-3 text-center">Status</th>
-                                <th class="px-4 py-3 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y">
-                            <tr v-for="debt in debts.data" :key="debt.id" class="hover:bg-muted/30">
-                                <td class="px-4 py-3">
-                                    <div class="font-semibold text-foreground">{{ debt.customer?.shop_name }}</div>
-                                    <div class="text-xs text-muted-foreground">{{ debt.customer?.owner_name || 'N/A' }} • {{ debt.customer?.phone || '' }}</div>
-                                </td>
-                                <td class="px-4 py-3 font-medium text-blue-600">{{ debt.batch?.batch_no }}</td>
-                                <td class="px-4 py-3 font-mono text-xs text-muted-foreground">{{ debt.delivery?.delivery_no }}</td>
-                                <td class="px-4 py-3 text-right text-muted-foreground">{{ formatMoney(debt.delivery?.total_amount) }}</td>
-                                <td class="px-4 py-3 text-right font-bold text-amber-600 dark:text-amber-400">
-                                    {{ formatMoney(debt.outstanding_amount) }}
-                                </td>
-                                <td class="px-4 py-3 text-center">
-                                    <StatusBadge :status="debt.status" />
-                                </td>
-                                <td class="px-4 py-3 text-right">
-                                    <Button
-                                        v-if="debt.status === 'open'"
-                                        variant="default"
-                                        size="sm"
-                                        class="h-8 px-2 text-xs bg-emerald-600 hover:bg-emerald-700"
-                                        @click="openPaymentModal(debt)"
-                                    >
-                                        <DollarSign class="h-3.5 w-3.5 mr-1" /> Record Repayment
-                                    </Button>
-                                    <span v-else class="text-xs text-muted-foreground font-medium">Fully Paid</span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div v-else>
+                    <div class="relative overflow-x-auto rounded-md border border-border/40">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-muted/50 text-xs uppercase text-muted-foreground">
+                                <tr>
+                                    <th class="px-4 py-3">Customer Shop</th>
+                                    <th class="px-4 py-3">Batch</th>
+                                    <th class="px-4 py-3">Delivery No</th>
+                                    <th class="px-4 py-3 text-right">Original Delivery</th>
+                                    <th class="px-4 py-3 text-right">Outstanding Debt</th>
+                                    <th class="px-4 py-3 text-center">Status</th>
+                                    <th class="px-4 py-3 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-border/40">
+                                <tr v-for="debt in debts.data" :key="debt.id" class="hover:bg-muted/30">
+                                    <td class="px-4 py-3 whitespace-nowrap">
+                                        <div class="font-semibold text-foreground">{{ debt.customer?.shop_name }}</div>
+                                        <div class="text-xs text-muted-foreground">{{ debt.customer?.owner_name || 'N/A' }} • {{ debt.customer?.phone || '' }}</div>
+                                    </td>
+                                    <td class="px-4 py-3 font-medium text-blue-600 dark:text-blue-400 whitespace-nowrap">{{ debt.batch?.batch_no }}</td>
+                                    <td class="px-4 py-3 font-mono text-xs text-muted-foreground whitespace-nowrap">{{ debt.delivery?.delivery_no }}</td>
+                                    <td class="px-4 py-3 text-right text-muted-foreground whitespace-nowrap">{{ formatMoney(debt.delivery?.total_amount) }}</td>
+                                    <td class="px-4 py-3 text-right font-bold text-amber-600 dark:text-amber-400 whitespace-nowrap">
+                                        {{ formatMoney(debt.outstanding_amount) }}
+                                    </td>
+                                    <td class="px-4 py-3 text-center whitespace-nowrap">
+                                        <StatusBadge :status="debt.status" />
+                                    </td>
+                                    <td class="px-4 py-3 text-right whitespace-nowrap">
+                                        <Button
+                                            v-if="debt.status === 'open'"
+                                            variant="default"
+                                            size="sm"
+                                            class="h-8 px-2 text-xs bg-emerald-600 hover:bg-emerald-700"
+                                            @click="openPaymentModal(debt)"
+                                        >
+                                            <DollarSign class="h-3.5 w-3.5 mr-1" /> Record Repayment
+                                        </Button>
+                                        <span v-else class="text-xs text-muted-foreground font-medium">Fully Paid</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <Pagination
+                        :links="debts.links"
+                        :from="debts.from"
+                        :to="debts.to"
+                        :total="debts.total"
+                        class="mt-4"
+                    />
                 </div>
             </CardContent>
         </Card>

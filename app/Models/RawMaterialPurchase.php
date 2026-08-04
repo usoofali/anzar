@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-#[Fillable(['purchase_no', 'purchase_date', 'quantity_kg', 'unit_price', 'total_cost', 'remarks'])]
+#[Fillable(['purchase_no', 'supplier', 'purchase_date', 'quantity_kg', 'unit_price', 'total_cost', 'remarks'])]
 class RawMaterialPurchase extends Model
 {
     /** @use HasFactory<RawMaterialPurchaseFactory> */

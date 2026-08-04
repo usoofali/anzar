@@ -19,21 +19,19 @@ defineProps<Props>();
         :class="className"
         v-bind="$attrs"
     >
+        <!-- Anzar Water Droplet -->
         <path
-            d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+            d="M12 2.25C12 2.25 18.25 8.65 18.25 13.75C18.25 17.2 15.45 20 12 20C8.55 20 5.75 17.2 5.75 13.75C5.75 8.65 12 2.25 12 2.25Z"
+            fill="currentColor"
         />
+        <!-- Internal Light Reflection Wave -->
         <path
-            d="M12 6a5 5 0 0 1 3.5 1.5"
+            d="M10.2 7.2C11.6 8.7 13.2 10.8 13.2 13.2"
             fill="none"
-            stroke="currentColor"
-            stroke-width="1.5"
+            stroke="rgba(255, 255, 255, 0.65)"
+            stroke-width="1.6"
             stroke-linecap="round"
-            opacity="0.7"
         />
     </svg>
 </template>
+
