@@ -36,6 +36,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/production-batches/{productionBatch}', [ProductionBatchController::class, 'show'])->name('production-batches.show');
         Route::post('/production-batches/{productionBatch}/toggle-status', [ProductionBatchController::class, 'toggleStatus'])->name('production-batches.toggle-status');
         Route::delete('/production-batches/{productionBatch}', [ProductionBatchController::class, 'destroy'])->name('production-batches.destroy');
+        Route::post('/production-batches/{productionBatch}/productions', [ProductionBatchController::class, 'storeProduction'])->name('production-batches.store-production');
+        Route::delete('/production-batches/{productionBatch}/productions/{batchProduction}', [ProductionBatchController::class, 'destroyProduction'])->name('production-batches.destroy-production');
     });
 
     // Distribution & Sales Module (Manager & Sales Staff)
@@ -73,14 +75,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/expenses', [ExpenseController::class, 'store'])->name('expenses.store');
     });
 
-    // Manager-Only Module (Reports, Expense Deletion, User Management)
+    // Manager-Only Module (Reports, Expense Deletion)
     Route::middleware(['role:manager'])->group(function () {
         Route::delete('/expenses/{expense}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
 
         // Reports
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    });
 
-        // User Management
+    // Admin-Only Module (User Management)
+    Route::middleware(['role:admin'])->group(function () {
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::post('/users', [UserController::class, 'store'])->name('users.store');
         Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');

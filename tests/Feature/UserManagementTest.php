@@ -5,18 +5,18 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-test('manager can view staff users page', function () {
-    $manager = User::factory()->create(['role' => 'manager']);
+test('admin can view staff users page', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
 
-    $response = $this->actingAs($manager)->get('/users');
+    $response = $this->actingAs($admin)->get('/users');
 
     $response->assertStatus(200);
 });
 
-test('manager can create a new staff user with username or email', function () {
-    $manager = User::factory()->create(['role' => 'manager']);
+test('admin can create a new staff user with username or email', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
 
-    $response = $this->actingAs($manager)->post('/users', [
+    $response = $this->actingAs($admin)->post('/users', [
         'name' => 'Khadija Bello',
         'email' => 'khadija@anzar.com',
         'username' => 'khadija',
@@ -34,11 +34,11 @@ test('manager can create a new staff user with username or email', function () {
     ]);
 });
 
-test('manager can reset staff password', function () {
-    $manager = User::factory()->create(['role' => 'manager']);
+test('admin can reset staff password', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
     $staff = User::factory()->create(['role' => 'sales_staff']);
 
-    $response = $this->actingAs($manager)->post("/users/{$staff->id}/reset-password", [
+    $response = $this->actingAs($admin)->post("/users/{$staff->id}/reset-password", [
         'password' => 'newpassword123',
     ]);
 

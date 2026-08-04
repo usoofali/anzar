@@ -21,8 +21,13 @@ class EnsureUserHasRole
             return redirect()->route('login');
         }
 
-        // Managers have access to all routes
-        if ($user->isManager()) {
+        // Admins have access to all routes
+        if ($user->isAdmin()) {
+            return $next($request);
+        }
+
+        // Managers have access to all routes EXCEPT those explicitly requiring admin
+        if ($user->isManager() && ! in_array('admin', $roles, true)) {
             return $next($request);
         }
 

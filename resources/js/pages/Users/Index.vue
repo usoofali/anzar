@@ -165,6 +165,8 @@ const confirmDelete = () => {
 
 const roleLabel = (role: string) => {
     switch (role) {
+        case 'admin':
+            return 'Admin';
         case 'manager':
             return 'Manager';
         case 'production_staff':
@@ -309,15 +311,16 @@ const roleLabel = (role: string) => {
                         </div>
                         <div class="space-y-1">
                             <Label for="role">Role</Label>
-                            <select
-                                id="role"
-                                v-model="form.role"
-                                class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                            >
-                                <option value="manager">Manager</option>
-                                <option value="production_staff">Production Staff</option>
-                                <option value="sales_staff">Sales Staff</option>
-                            </select>
+                             <select
+                                 id="role"
+                                 v-model="form.role"
+                                 class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                             >
+                                 <option value="admin">Admin</option>
+                                 <option value="manager">Manager</option>
+                                 <option value="production_staff">Production Staff</option>
+                                 <option value="sales_staff">Sales Staff</option>
+                             </select>
                         </div>
                     </div>
 

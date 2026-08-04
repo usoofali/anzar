@@ -43,8 +43,26 @@ test('sales staff can access distribution module and expenses but is blocked fro
     $this->actingAs($user)->get('/users')->assertStatus(403);
 });
 
-test('manager has full access to all system modules', function () {
+test('manager has access to all modules except user management', function () {
     $user = User::factory()->create(['role' => 'manager']);
+
+    $this->actingAs($user)->get('/dashboard')->assertStatus(200);
+    $this->actingAs($user)->get('/raw-materials')->assertStatus(200);
+    $this->actingAs($user)->get('/production-batches')->assertStatus(200);
+    $this->actingAs($user)->get('/customers')->assertStatus(200);
+    $this->actingAs($user)->get('/deliveries')->assertStatus(200);
+    $this->actingAs($user)->get('/daily-collections')->assertStatus(200);
+    $this->actingAs($user)->get('/customer-debts')->assertStatus(200);
+    $this->actingAs($user)->get('/leakage-returns')->assertStatus(200);
+    $this->actingAs($user)->get('/expenses')->assertStatus(200);
+    $this->actingAs($user)->get('/reports')->assertStatus(200);
+
+    // Manager is blocked from user management (admin-only)
+    $this->actingAs($user)->get('/users')->assertStatus(403);
+});
+
+test('admin has full access to all system modules including user management', function () {
+    $user = User::factory()->create(['role' => 'admin']);
 
     $this->actingAs($user)->get('/dashboard')->assertStatus(200);
     $this->actingAs($user)->get('/raw-materials')->assertStatus(200);

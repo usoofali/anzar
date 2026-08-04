@@ -31,7 +31,8 @@ import { useCurrentUrl } from '@/composables/useCurrentUrl';
 
 const page = usePage();
 const user = page.props.auth?.user;
-const isManager = !user?.role || user?.role === 'manager';
+const isAdmin = user?.role === 'admin';
+const isManager = isAdmin || user?.role === 'manager';
 const isProduction = isManager || user?.role === 'production_staff';
 const isSales = isManager || user?.role === 'sales_staff';
 
@@ -83,7 +84,7 @@ const navGroups = [
         show: isManager,
         items: [
             { title: 'Reports & Analytics', href: '/reports', icon: BarChart3 },
-            { title: 'User Management', href: '/users', icon: Users },
+            ...(isAdmin ? [{ title: 'User Management', href: '/users', icon: Users }] : []),
         ],
     },
 ];

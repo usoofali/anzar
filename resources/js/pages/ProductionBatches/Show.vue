@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { Head, Link } from '@inertiajs/vue3';
-import { ArrowLeft, Boxes, CreditCard, Droplet, Factory, Lock, PackageCheck, Printer, TrendingUp, Unlock, Wallet } from '@lucide/vue';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
+import { ArrowLeft, Boxes, CreditCard, Droplet, Factory, Lock, PackageCheck, Plus, Printer, Trash2, TrendingUp, Unlock, Wallet } from '@lucide/vue';
 import StatusBadge from '@/components/ui/StatusBadge.vue';
 import PrintableReportHeader from '@/components/ui/PrintableReportHeader.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatDate } from '@/lib/utils';
+import { toast } from 'vue-sonner';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface BatchSummary {
     id: number;
@@ -33,6 +37,8 @@ interface BatchSummary {
     gross_profit: number;
     realized_cash_profit: number;
     profit_margin_percent: number;
+    remaining_nylon_kg: number;
+    remaining_packing_pieces: number;
 }
 
 interface Props {
@@ -42,6 +48,7 @@ interface Props {
     customerDebts: any[];
     debtPayments: any[];
     leakageReturns: any[];
+    batchProductions: any[];
 }
 
 const props = defineProps<Props>();
@@ -55,7 +62,7 @@ defineOptions({
     },
 });
 
-const activeTab = ref<'deliveries' | 'collections' | 'debts' | 'leakages'>('deliveries');
+const activeTab = ref<'productions' | 'deliveries' | 'collections' | 'debts' | 'leakages'>('productions');
 
 const formatMoney = (amount: number) => {
     return '₦' + (amount || 0).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -63,6 +70,47 @@ const formatMoney = (amount: number) => {
 
 const triggerPrint = () => {
     window.print();
+};
+
+const page = usePage();
+const user = page.props.auth?.user;
+const isManager = !user?.role || user?.role === 'manager' || user?.role === 'admin';
+const isProduction = isManager || user?.role === 'production_staff';
+
+// Dialog Form for daily sub-production run
+const isProductionModalOpen = ref(false);
+const productionForm = useForm({
+    production_date: new Date().toISOString().split('T')[0],
+    production_time: 'morning',
+    bags_produced: '' as any,
+    remarks: '',
+});
+
+const openProductionModal = () => {
+    productionForm.reset();
+    productionForm.production_date = new Date().toISOString().split('T')[0];
+    isProductionModalOpen.value = true;
+};
+
+const submitProductionForm = () => {
+    productionForm.post(`/production-batches/${props.batch.id}/productions`, {
+        onSuccess: () => {
+            isProductionModalOpen.value = false;
+            productionForm.reset();
+            toast.success('Production run logged successfully.');
+        },
+        onError: () => toast.error('Failed to log production run. Please check remaining limits.'),
+    });
+};
+
+// Delete production run
+const deleteProductionRun = (runId: number) => {
+    if (confirm('Are you sure you want to delete this production run? This will update the batch aggregates.')) {
+        useForm({}).delete(`/production-batches/${props.batch.id}/productions/${runId}`, {
+            onSuccess: () => toast.success('Production run deleted successfully.'),
+            onError: () => toast.error('Failed to delete production run.'),
+        });
+    }
 };
 </script>
 
@@ -99,6 +147,14 @@ const triggerPrint = () => {
                 <Button variant="outline" size="sm" class="gap-1.5 w-full sm:w-auto justify-center" @click="triggerPrint">
                     <Printer class="h-4 w-4" /> Print / Export PDF
                 </Button>
+                <Button
+                    v-if="batch.status === 'active' && isProduction"
+                    class="gap-1.5 bg-blue-600 hover:bg-blue-700 w-full sm:w-auto justify-center"
+                    size="sm"
+                    @click="openProductionModal"
+                >
+                    <Plus class="h-4 w-4" /> Record Production Run
+                </Button>
             </div>
         </div>
 
@@ -106,11 +162,13 @@ const triggerPrint = () => {
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Card>
                 <CardHeader class="pb-2">
-                    <CardTitle class="text-xs font-semibold uppercase text-muted-foreground">Raw Material & Production</CardTitle>
+                    <CardTitle class="text-xs font-semibold uppercase text-muted-foreground">Raw Material Capacity</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div class="text-xl font-bold text-foreground">{{ batch.bags_produced.toLocaleString() }} Bags</div>
-                    <p class="text-xs text-muted-foreground mt-1">From {{ batch.quantity_used_kg }} KG Nylon</p>
+                    <p class="text-xs text-muted-foreground mt-1">
+                        Left: {{ batch.remaining_nylon_kg }} KG / {{ batch.remaining_packing_pieces }} Bags
+                    </p>
                 </CardContent>
             </Card>
 
@@ -151,6 +209,13 @@ const triggerPrint = () => {
                 <div class="flex items-center gap-2 overflow-x-auto pb-1 whitespace-nowrap">
                     <button
                         class="px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-colors whitespace-nowrap shrink-0"
+                        :class="activeTab === 'productions' ? 'bg-blue-600 text-white font-semibold shadow-sm' : 'bg-muted/40 text-muted-foreground hover:text-foreground hover:bg-muted'"
+                        @click="activeTab = 'productions'"
+                    >
+                        Production Runs ({{ batchProductions.length }})
+                    </button>
+                    <button
+                        class="px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-colors whitespace-nowrap shrink-0"
                         :class="activeTab === 'deliveries' ? 'bg-blue-600 text-white font-semibold shadow-sm' : 'bg-muted/40 text-muted-foreground hover:text-foreground hover:bg-muted'"
                         @click="activeTab = 'deliveries'"
                     >
@@ -181,6 +246,52 @@ const triggerPrint = () => {
             </CardHeader>
 
             <CardContent class="pt-4">
+                <!-- Production Runs Tab -->
+                <div v-if="activeTab === 'productions'">
+                    <div v-if="batchProductions.length === 0" class="text-center py-6 text-sm text-muted-foreground">
+                        No production runs logged for this batch yet.
+                    </div>
+                    <div v-else class="relative w-full overflow-x-auto rounded-md border border-border/40">
+                        <table class="w-full min-w-[700px] text-left text-sm">
+                            <thead class="bg-muted/50 text-xs uppercase text-muted-foreground">
+                                <tr>
+                                    <th class="px-4 py-3">Production Date</th>
+                                    <th class="px-4 py-3">Shift</th>
+                                    <th class="px-4 py-3 text-right">Nylon Used (KG)</th>
+                                    <th class="px-4 py-3 text-right">Packing Nylon Used</th>
+                                    <th class="px-4 py-3 text-right">Bags Produced</th>
+                                    <th class="px-4 py-3">Remarks</th>
+                                    <th class="px-4 py-3">Recorded By</th>
+                                    <th v-if="batch.status === 'active' && isManager" class="px-4 py-3 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-border/40">
+                                <tr v-for="p in batchProductions" :key="p.id" class="hover:bg-muted/30">
+                                    <td class="px-4 py-3 font-semibold text-foreground whitespace-nowrap">{{ formatDate(p.production_date) }}</td>
+                                    <td class="px-4 py-3 whitespace-nowrap capitalize text-muted-foreground">{{ p.production_time }}</td>
+                                    <td class="px-4 py-3 text-right font-medium whitespace-nowrap text-blue-600 dark:text-blue-400">{{ p.nylon_used_kg }} KG</td>
+                                    <td class="px-4 py-3 text-right font-medium whitespace-nowrap text-purple-600 dark:text-purple-400">{{ p.packing_nylon_used }} Pcs</td>
+                                    <td class="px-4 py-3 text-right font-bold text-foreground whitespace-nowrap">{{ p.bags_produced }} Bags</td>
+                                    <td class="px-4 py-3 text-xs text-muted-foreground max-w-xs truncate">{{ p.remarks || 'N/A' }}</td>
+                                    <td class="px-4 py-3 text-muted-foreground whitespace-nowrap">{{ p.produced_by_name }}</td>
+                                    <td v-if="batch.status === 'active' && isManager" class="px-4 py-3 text-right whitespace-nowrap">
+                                        <Button
+                                            v-if="batchProductions.length > 1"
+                                            variant="ghost"
+                                            size="sm"
+                                            class="h-8 px-2 text-xs text-rose-600 hover:text-rose-700"
+                                            @click="deleteProductionRun(p.id)"
+                                        >
+                                            <Trash2 class="h-3.5 w-3.5" />
+                                        </Button>
+                                        <span v-else class="text-xs text-muted-foreground italic">Required initial run</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <!-- Deliveries Tab -->
                 <div v-if="activeTab === 'deliveries'">
                     <div v-if="deliveries.length === 0" class="text-center py-6 text-sm text-muted-foreground">
@@ -408,5 +519,64 @@ const triggerPrint = () => {
                 </div>
             </CardContent>
         </Card>
+
+        <!-- Record Production Run Dialog -->
+        <Dialog :open="isProductionModalOpen" @update:open="isProductionModalOpen = $event">
+            <DialogContent class="sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Record Daily Production Run</DialogTitle>
+                    <DialogDescription>Log a new production run using remaining nylon and outer bags capacity.</DialogDescription>
+                </DialogHeader>
+
+                <form @submit.prevent="submitProductionForm" class="space-y-4 py-2">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <Label for="run_production_date">Production Date</Label>
+                            <Input id="run_production_date" type="date" v-model="productionForm.production_date" required />
+                        </div>
+                        <div class="space-y-1">
+                            <Label for="run_production_time">Production Shift</Label>
+                            <select
+                                id="run_production_time"
+                                v-model="productionForm.production_time"
+                                required
+                                class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring dark:bg-slate-900 dark:border-slate-800"
+                            >
+                                <option value="morning">Morning</option>
+                                <option value="afternoon">Afternoon</option>
+                                <option value="evening">Evening</option>
+                                <option value="night">Night</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1">
+                        <Label for="run_bags_produced">Bags Produced</Label>
+                        <Input
+                            id="run_bags_produced"
+                            type="number"
+                            min="1"
+                            :max="batch.remaining_packing_pieces"
+                            v-model="productionForm.bags_produced"
+                            required
+                            :placeholder="`Max: ${batch.remaining_packing_pieces} Bags`"
+                        />
+                        <p class="text-[10px] text-muted-foreground">Available: {{ batch.remaining_packing_pieces }} Bags</p>
+                    </div>
+
+                    <div class="space-y-1">
+                        <Label for="run_remarks">Remarks (Optional)</Label>
+                        <Input id="run_remarks" v-model="productionForm.remarks" placeholder="e.g. Afternoon shift run" />
+                    </div>
+
+                    <DialogFooter class="pt-4">
+                        <Button type="button" variant="outline" @click="isProductionModalOpen = false">Cancel</Button>
+                        <Button type="submit" :disabled="productionForm.processing || batch.remaining_packing_pieces <= 0">
+                            Log Production Run
+                        </Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
     </div>
 </template>

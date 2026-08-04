@@ -35,12 +35,14 @@ class RawMaterialPurchaseController extends Controller
             'purchase_date' => ['required', 'date'],
             'quantity_kg' => ['required', 'numeric', 'min:0.01'],
             'unit_price' => ['required', 'numeric', 'min:0'],
+            'packing_nylon_pieces' => ['required', 'integer', 'min:0'],
+            'packing_unit_price' => ['required', 'numeric', 'min:0'],
             'remarks' => ['nullable', 'string'],
         ]);
 
         $count = RawMaterialPurchase::count() + 1;
         $validated['purchase_no'] = 'RMP-'.str_pad((string) $count, 3, '0', STR_PAD_LEFT);
-        $validated['total_cost'] = $validated['quantity_kg'] * $validated['unit_price'];
+        $validated['total_cost'] = ($validated['quantity_kg'] * $validated['unit_price']) + ($validated['packing_nylon_pieces'] * $validated['packing_unit_price']);
 
         RawMaterialPurchase::create($validated);
 

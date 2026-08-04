@@ -50,6 +50,7 @@ interface RawMaterial {
     supplier: string;
     quantity_kg: number;
     purchase_date: string;
+    packing_nylon_pieces: number;
 }
 
 interface Props {
@@ -81,8 +82,17 @@ const isModalOpen = ref(false);
 const form = useForm({
     raw_material_purchase_id: '',
     production_date: new Date().toISOString().split('T')[0],
+    production_time: 'morning',
     bags_produced: '' as any,
 });
+
+const handlePurchaseChange = () => {
+    const purchaseId = parseInt(form.raw_material_purchase_id);
+    const purchase = props.availablePurchases.find(p => p.id === purchaseId);
+    if (purchase) {
+        form.bags_produced = purchase.packing_nylon_pieces || '';
+    }
+};
 
 const openCreateModal = () => {
     form.reset();
@@ -276,11 +286,12 @@ const formatMoney = (amount: number) => {
                             id="raw_material"
                             v-model="form.raw_material_purchase_id"
                             required
+                            @change="handlePurchaseChange"
                             class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
                         >
                             <option value="" disabled>Select unassigned nylon purchase...</option>
                             <option v-for="rm in availablePurchases" :key="rm.id" :value="rm.id">
-                                {{ rm.purchase_no }} ({{ rm.quantity_kg }} KG)
+                                {{ rm.purchase_no }} ({{ rm.quantity_kg }} KG / {{ rm.packing_nylon_pieces }} Pcs)
                             </option>
                         </select>
                         <p v-if="availablePurchases.length === 0" class="text-xs text-amber-600">
@@ -294,9 +305,25 @@ const formatMoney = (amount: number) => {
                             <Input id="production_date" type="date" v-model="form.production_date" required />
                         </div>
                         <div class="space-y-1">
-                            <Label for="bags_produced">Bags Produced</Label>
-                            <Input id="bags_produced" type="number" min="1" v-model="form.bags_produced" required placeholder="e.g. 250" />
+                            <Label for="production_time">Production Shift</Label>
+                            <select
+                                id="production_time"
+                                v-model="form.production_time"
+                                required
+                                class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring dark:bg-slate-900 dark:border-slate-800"
+                            >
+                                <option value="morning">Morning</option>
+                                <option value="afternoon">Afternoon</option>
+                                <option value="evening">Evening</option>
+                                <option value="night">Night</option>
+                            </select>
                         </div>
+                    </div>
+
+                    <div class="space-y-1">
+                        <Label for="bags_produced">Bags Produced</Label>
+                        <Input id="bags_produced" type="number" min="1" v-model="form.bags_produced" required placeholder="e.g. 250" />
+                        <p v-if="form.errors.bags_produced" class="text-xs text-rose-500">{{ form.errors.bags_produced }}</p>
                     </div>
 
                     <DialogFooter class="pt-4">

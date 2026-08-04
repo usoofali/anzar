@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BatchProduction;
 use App\Models\ProductionBatch;
 use App\Models\RawMaterialPurchase;
 use Illuminate\Http\RedirectResponse;
@@ -67,22 +68,43 @@ class ProductionBatchController extends Controller
         $validated = $request->validate([
             'raw_material_purchase_id' => ['required', 'exists:raw_material_purchases,id', 'unique:production_batches,raw_material_purchase_id'],
             'production_date' => ['required', 'date'],
+            'production_time' => ['required', 'string', 'in:morning,afternoon,evening,night'],
             'bags_produced' => ['required', 'integer', 'min:1'],
         ]);
 
         $purchase = RawMaterialPurchase::findOrFail($validated['raw_material_purchase_id']);
 
+        if ($validated['bags_produced'] > $purchase->packing_nylon_pieces) {
+            return back()->withErrors(['bags_produced' => 'Bags produced cannot exceed purchased packing nylon pieces ('.$purchase->packing_nylon_pieces.')']);
+        }
+
+        // Proportional nylon calculation
+        $nylonUsed = $purchase->packing_nylon_pieces > 0
+            ? $validated['bags_produced'] * ($purchase->quantity_kg / $purchase->packing_nylon_pieces)
+            : 0;
+
         $batchCount = ProductionBatch::count() + 1;
         $batchNo = 'PB-'.str_pad((string) $batchCount, 3, '0', STR_PAD_LEFT);
 
-        ProductionBatch::create([
+        $batch = ProductionBatch::create([
             'batch_no' => $batchNo,
             'raw_material_purchase_id' => $purchase->id,
             'production_date' => $validated['production_date'],
-            'quantity_used_kg' => $purchase->quantity_kg,
+            'quantity_used_kg' => $nylonUsed,
             'bags_produced' => $validated['bags_produced'],
             'produced_by' => auth()->id(),
             'status' => 'active',
+        ]);
+
+        // Create the first daily production run record
+        $batch->batchProductions()->create([
+            'production_date' => $validated['production_date'],
+            'production_time' => $validated['production_time'],
+            'nylon_used_kg' => $nylonUsed,
+            'packing_nylon_used' => $validated['bags_produced'],
+            'bags_produced' => $validated['bags_produced'],
+            'produced_by' => auth()->id(),
+            'remarks' => 'Initial production run',
         ]);
 
         return back()->with('success', 'Production batch created successfully.');
@@ -93,6 +115,7 @@ class ProductionBatchController extends Controller
         $productionBatch->load([
             'rawMaterialPurchase',
             'producedBy',
+            'batchProductions.producedBy',
             'deliveries.customer',
             'dailyCollections.recordedBy',
             'customerDebts.customer',
@@ -118,6 +141,12 @@ class ProductionBatchController extends Controller
         $netProfitAfterLeakage = $grossProfit - $leakageLossValue;
         $realizedCashProfit = $totalCollected - $nylonCost;
         $profitMarginPercent = $expectedRevenue > 0 ? round(($netProfitAfterLeakage / $expectedRevenue) * 100, 1) : 0;
+
+        // Calculate remaining capacities for packing nylon & roll nylon
+        $totalNylonUsed = (float) $productionBatch->batchProductions()->sum('nylon_used_kg');
+        $totalPackingUsed = (int) $productionBatch->batchProductions()->sum('packing_nylon_used');
+        $remainingNylon = max(0, ($productionBatch->rawMaterialPurchase->quantity_kg ?? 0) - $totalNylonUsed);
+        $remainingPacking = max(0, ($productionBatch->rawMaterialPurchase->packing_nylon_pieces ?? 0) - $totalPackingUsed);
 
         $summary = [
             'id' => $productionBatch->id,
@@ -146,7 +175,23 @@ class ProductionBatchController extends Controller
             'net_profit_after_leakage' => $netProfitAfterLeakage,
             'realized_cash_profit' => $realizedCashProfit,
             'profit_margin_percent' => $profitMarginPercent,
+            'remaining_nylon_kg' => $remainingNylon,
+            'remaining_packing_pieces' => $remainingPacking,
         ];
+
+        // Format batch productions with user details for client
+        $batchProductionsFormatted = $productionBatch->batchProductions->map(function ($prod) {
+            return [
+                'id' => $prod->id,
+                'production_date' => $prod->production_date->format('Y-m-d'),
+                'production_time' => $prod->production_time,
+                'nylon_used_kg' => (float) $prod->nylon_used_kg,
+                'packing_nylon_used' => (int) $prod->packing_nylon_used,
+                'bags_produced' => (int) $prod->bags_produced,
+                'produced_by_name' => $prod->producedBy->name ?? 'N/A',
+                'remarks' => $prod->remarks,
+            ];
+        });
 
         return Inertia::render('ProductionBatches/Show', [
             'batch' => $summary,
@@ -155,7 +200,58 @@ class ProductionBatchController extends Controller
             'customerDebts' => $productionBatch->customerDebts,
             'debtPayments' => $productionBatch->debtPayments,
             'leakageReturns' => $productionBatch->leakageReturns,
+            'batchProductions' => $batchProductionsFormatted,
         ]);
+    }
+
+    public function storeProduction(Request $request, ProductionBatch $productionBatch): RedirectResponse
+    {
+        if ($productionBatch->status === 'closed') {
+            return back()->with('error', 'Cannot record production for a closed batch.');
+        }
+
+        $purchase = $productionBatch->rawMaterialPurchase;
+
+        $totalPackingUsed = (int) $productionBatch->batchProductions()->sum('packing_nylon_used');
+        $remainingPacking = max(0, $purchase->packing_nylon_pieces - $totalPackingUsed);
+
+        $validated = $request->validate([
+            'production_date' => ['required', 'date'],
+            'production_time' => ['required', 'string', 'in:morning,afternoon,evening,night'],
+            'bags_produced' => ['required', 'integer', 'min:1', 'max:'.$remainingPacking],
+            'remarks' => ['nullable', 'string'],
+        ]);
+
+        // Proportional nylon calculation
+        $nylonUsed = $purchase->packing_nylon_pieces > 0
+            ? $validated['bags_produced'] * ($purchase->quantity_kg / $purchase->packing_nylon_pieces)
+            : 0;
+
+        $productionBatch->batchProductions()->create([
+            'production_date' => $validated['production_date'],
+            'production_time' => $validated['production_time'],
+            'nylon_used_kg' => $nylonUsed,
+            'packing_nylon_used' => $validated['bags_produced'],
+            'bags_produced' => $validated['bags_produced'],
+            'produced_by' => auth()->id(),
+            'remarks' => $validated['remarks'],
+        ]);
+
+        $productionBatch->updateAggregates();
+
+        return back()->with('success', 'Production run logged successfully.');
+    }
+
+    public function destroyProduction(ProductionBatch $productionBatch, BatchProduction $batchProduction): RedirectResponse
+    {
+        if ($productionBatch->status === 'closed') {
+            return back()->with('error', 'Cannot modify a closed batch.');
+        }
+
+        $batchProduction->delete();
+        $productionBatch->updateAggregates();
+
+        return back()->with('success', 'Production run deleted successfully.');
     }
 
     public function toggleStatus(ProductionBatch $productionBatch): RedirectResponse

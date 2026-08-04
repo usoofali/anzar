@@ -11,6 +11,16 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // 1. Staff Users
+        $admin = User::create([
+            'name' => 'Anzar Admin Overseer',
+            'email' => 'admin@anzar.com',
+            'username' => 'admin',
+            'phone' => '08000000000',
+            'role' => 'admin',
+            'status' => 'active',
+            'password' => Hash::make('password'),
+        ]);
+
         $manager = User::create([
             'name' => 'Alhaji Aminu Bello Manager',
             'email' => 'manager@anzar.com',

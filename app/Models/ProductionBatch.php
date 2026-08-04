@@ -34,6 +34,18 @@ class ProductionBatch extends Model
         return $this->belongsTo(User::class, 'produced_by');
     }
 
+    public function batchProductions(): HasMany
+    {
+        return $this->hasMany(BatchProduction::class);
+    }
+
+    public function updateAggregates(): void
+    {
+        $this->quantity_used_kg = (float) $this->batchProductions()->sum('nylon_used_kg');
+        $this->bags_produced = (int) $this->batchProductions()->sum('bags_produced');
+        $this->save();
+    }
+
     public function deliveries(): HasMany
     {
         return $this->hasMany(Delivery::class, 'batch_id');

@@ -40,7 +40,7 @@ class UserController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'username' => ['nullable', 'string', 'max:255', 'unique:users,username'],
             'phone' => ['nullable', 'string', 'max:20'],
-            'role' => ['required', 'string', Rule::in(['manager', 'production_staff', 'sales_staff'])],
+            'role' => ['required', 'string', Rule::in(['admin', 'manager', 'production_staff', 'sales_staff'])],
             'status' => ['required', 'string', Rule::in(['active', 'inactive'])],
             'password' => ['required', 'string', 'min:8'],
         ]);
@@ -59,7 +59,7 @@ class UserController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'username' => ['nullable', 'string', 'max:255', Rule::unique('users')->ignore($user->id)],
             'phone' => ['nullable', 'string', 'max:20'],
-            'role' => ['required', 'string', Rule::in(['manager', 'production_staff', 'sales_staff'])],
+            'role' => ['required', 'string', Rule::in(['admin', 'manager', 'production_staff', 'sales_staff'])],
             'status' => ['required', 'string', Rule::in(['active', 'inactive'])],
         ]);
 

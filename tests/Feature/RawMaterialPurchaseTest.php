@@ -13,6 +13,8 @@ test('staff can record raw material nylon purchase', function () {
         'purchase_date' => '2026-07-31',
         'quantity_kg' => 40.00,
         'unit_price' => 1500.00,
+        'packing_nylon_pieces' => 200,
+        'packing_unit_price' => 20.00,
         'remarks' => '40 KG nylon rolls',
     ]);
 
@@ -20,6 +22,6 @@ test('staff can record raw material nylon purchase', function () {
     $this->assertDatabaseHas('raw_material_purchases', [
         'supplier' => 'Kano Packaging Ltd',
         'quantity_kg' => 40.00,
-        'total_cost' => 60000.00,
+        'total_cost' => 64000.00, // (40 * 1500) + (200 * 20)
     ]);
 });

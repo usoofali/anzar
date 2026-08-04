@@ -32,6 +32,8 @@ interface PurchaseItem {
     purchase_date: string;
     quantity_kg: number;
     unit_price: number;
+    packing_nylon_pieces: number;
+    packing_unit_price: number;
     total_cost: number;
     remarks: string | null;
     production_batch?: {
@@ -67,13 +69,17 @@ const form = useForm({
     purchase_date: new Date().toISOString().split('T')[0],
     quantity_kg: '' as any,
     unit_price: '' as any,
+    packing_nylon_pieces: '' as any,
+    packing_unit_price: '' as any,
     remarks: '',
 });
 
 const computedTotalCost = computed(() => {
     const qty = parseFloat(form.quantity_kg) || 0;
     const price = parseFloat(form.unit_price) || 0;
-    return qty * price;
+    const packingPieces = parseInt(form.packing_nylon_pieces) || 0;
+    const packingPrice = parseFloat(form.packing_unit_price) || 0;
+    return (qty * price) + (packingPieces * packingPrice);
 });
 
 const openModal = () => {
@@ -164,8 +170,8 @@ const formatMoney = (amount: number) => {
                                 <tr>
                                     <th class="px-4 py-3">Purchase No</th>
                                     <th class="px-4 py-3">Date</th>
-                                    <th class="px-4 py-3 text-right">Quantity (KG)</th>
-                                    <th class="px-4 py-3 text-right">Unit Price</th>
+                                    <th class="px-4 py-3 text-right">Roll Nylon</th>
+                                    <th class="px-4 py-3 text-right">Packing Nylon</th>
                                     <th class="px-4 py-3 text-right">Total Cost</th>
                                     <th class="px-4 py-3 text-center">Batch Linked</th>
                                     <th class="px-4 py-3 text-right">Actions</th>
@@ -175,8 +181,14 @@ const formatMoney = (amount: number) => {
                                 <tr v-for="p in purchases.data" :key="p.id" class="hover:bg-muted/30">
                                     <td class="px-4 py-3 font-mono text-xs font-semibold text-blue-600 dark:text-blue-400 whitespace-nowrap">{{ p.purchase_no }}</td>
                                     <td class="px-4 py-3 text-muted-foreground whitespace-nowrap">{{ formatDate(p.purchase_date) }}</td>
-                                    <td class="px-4 py-3 text-right font-bold text-foreground whitespace-nowrap">{{ p.quantity_kg }} KG</td>
-                                    <td class="px-4 py-3 text-right text-muted-foreground whitespace-nowrap">{{ formatMoney(p.unit_price) }}</td>
+                                    <td class="px-4 py-3 text-right whitespace-nowrap">
+                                        <div class="font-bold text-foreground">{{ p.quantity_kg }} KG</div>
+                                        <div class="text-xs text-muted-foreground">@ {{ formatMoney(p.unit_price) }}/KG</div>
+                                    </td>
+                                    <td class="px-4 py-3 text-right whitespace-nowrap">
+                                        <div class="font-bold text-foreground">{{ p.packing_nylon_pieces }} Pcs</div>
+                                        <div class="text-xs text-muted-foreground">@ {{ formatMoney(p.packing_unit_price) }}/Pc</div>
+                                    </td>
                                     <td class="px-4 py-3 text-right font-semibold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">{{ formatMoney(p.total_cost) }}</td>
                                     <td class="px-4 py-3 text-center whitespace-nowrap">
                                         <span v-if="p.production_batch" class="inline-flex items-center rounded-md bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-950/50 dark:text-blue-300 border border-blue-200/50 dark:border-blue-800/40">
@@ -219,27 +231,44 @@ const formatMoney = (amount: number) => {
                             <Input id="purchase_date" type="date" v-model="form.purchase_date" required />
                         </div>
                         <div class="space-y-1">
-                            <Label for="quantity_kg">Quantity (KG)</Label>
-                            <Input id="quantity_kg" type="number" step="0.01" min="0.1" v-model="form.quantity_kg" required placeholder="20.00" />
+                            <Label for="remarks">Remarks (Optional)</Label>
+                            <Input id="remarks" v-model="form.remarks" placeholder="Batch thickness 50 micron" />
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="space-y-1">
-                            <Label for="unit_price">Unit Price per KG (₦)</Label>
-                            <Input id="unit_price" type="number" step="0.01" min="0" v-model="form.unit_price" required placeholder="1800.00" />
-                        </div>
-                        <div class="space-y-1">
-                            <Label>Calculated Total Cost</Label>
-                            <div class="flex h-9 w-full items-center rounded-md border border-input bg-muted/40 px-3 py-1 text-sm font-semibold text-emerald-600">
-                                {{ formatMoney(computedTotalCost) }}
+                    <div class="border-t pt-3 mt-2">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Roll Nylon (Raw Film)</h4>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="space-y-1">
+                                <Label for="quantity_kg">Quantity (KG)</Label>
+                                <Input id="quantity_kg" type="number" step="0.01" min="0.1" v-model="form.quantity_kg" required placeholder="20.00" />
+                            </div>
+                            <div class="space-y-1">
+                                <Label for="unit_price">Price per KG (₦)</Label>
+                                <Input id="unit_price" type="number" step="0.01" min="0" v-model="form.unit_price" required placeholder="1800.00" />
                             </div>
                         </div>
                     </div>
 
-                    <div class="space-y-1">
-                        <Label for="remarks">Remarks (Optional)</Label>
-                        <Input id="remarks" v-model="form.remarks" placeholder="Batch thickness 50 micron" />
+                    <div class="border-t pt-3 mt-2">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Packing Nylon (Outer Bags)</h4>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="space-y-1">
+                                <Label for="packing_nylon_pieces">Pieces (Bags)</Label>
+                                <Input id="packing_nylon_pieces" type="number" min="0" v-model="form.packing_nylon_pieces" required placeholder="500" />
+                            </div>
+                            <div class="space-y-1">
+                                <Label for="packing_unit_price">Price per Piece (₦)</Label>
+                                <Input id="packing_unit_price" type="number" step="0.01" min="0" v-model="form.packing_unit_price" required placeholder="25.00" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border-t pt-3">
+                        <div class="flex justify-between items-center bg-muted/40 p-2.5 rounded-md border border-border/60">
+                            <span class="text-xs font-semibold text-muted-foreground">Calculated Total Cost:</span>
+                            <span class="text-base font-extrabold text-emerald-600">{{ formatMoney(computedTotalCost) }}</span>
+                        </div>
                     </div>
 
                     <DialogFooter class="pt-4">

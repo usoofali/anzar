@@ -16,12 +16,15 @@ test('production staff can create production batch linked to nylon purchase', fu
         'purchase_date' => '2026-07-31',
         'quantity_kg' => 30.00,
         'unit_price' => 2000.00,
-        'total_cost' => 60000.00,
+        'packing_nylon_pieces' => 500,
+        'packing_unit_price' => 25.00,
+        'total_cost' => 72500.00,
     ]);
 
     $response = $this->actingAs($user)->post('/production-batches', [
         'raw_material_purchase_id' => $purchase->id,
         'production_date' => '2026-07-31',
+        'production_time' => 'morning',
         'bags_produced' => 300,
     ]);
 
@@ -29,6 +32,7 @@ test('production staff can create production batch linked to nylon purchase', fu
     $this->assertDatabaseHas('production_batches', [
         'raw_material_purchase_id' => $purchase->id,
         'bags_produced' => 300,
+        'quantity_used_kg' => 18.00, // 300 * (30.00 / 500)
         'status' => 'active',
     ]);
 });
