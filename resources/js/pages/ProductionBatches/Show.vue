@@ -18,7 +18,6 @@ interface BatchSummary {
     production_date: string;
     raw_material_supplier: string;
     raw_material_purchase_no: string;
-    quantity_used_kg: number;
     unit_price_per_kg: number;
     nylon_cost: number;
     cost_per_bag: number;
@@ -37,7 +36,6 @@ interface BatchSummary {
     gross_profit: number;
     realized_cash_profit: number;
     profit_margin_percent: number;
-    remaining_nylon_kg: number;
     remaining_packing_pieces: number;
 }
 
@@ -143,7 +141,7 @@ const deleteProductionRun = (runId: number) => {
                     <p class="text-xs sm:text-sm text-muted-foreground mt-0.5">Produced on {{ formatDate(batch.production_date) }} by {{ batch.produced_by }}</p>
                 </div>
             </div>
-            <div class="flex items-center gap-2 w-full sm:w-auto">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
                 <Button variant="outline" size="sm" class="gap-1.5 w-full sm:w-auto justify-center" @click="triggerPrint">
                     <Printer class="h-4 w-4" /> Print / Export PDF
                 </Button>
@@ -167,7 +165,7 @@ const deleteProductionRun = (runId: number) => {
                 <CardContent>
                     <div class="text-xl font-bold text-foreground">{{ batch.bags_produced.toLocaleString() }} Bags</div>
                     <p class="text-xs text-muted-foreground mt-1">
-                        Left: {{ batch.remaining_nylon_kg }} KG / {{ batch.remaining_packing_pieces }} Bags
+                        Remaining: {{ batch.remaining_packing_pieces }} Bags
                     </p>
                 </CardContent>
             </Card>
@@ -254,10 +252,9 @@ const deleteProductionRun = (runId: number) => {
                     <div v-else class="relative w-full overflow-x-auto rounded-md border border-border/40">
                         <table class="w-full min-w-[700px] text-left text-sm">
                             <thead class="bg-muted/50 text-xs uppercase text-muted-foreground">
-                                <tr>
+                            <tr>
                                     <th class="px-4 py-3">Production Date</th>
                                     <th class="px-4 py-3">Shift</th>
-                                    <th class="px-4 py-3 text-right">Nylon Used (KG)</th>
                                     <th class="px-4 py-3 text-right">Packing Nylon Used</th>
                                     <th class="px-4 py-3 text-right">Bags Produced</th>
                                     <th class="px-4 py-3">Remarks</th>
@@ -269,7 +266,6 @@ const deleteProductionRun = (runId: number) => {
                                 <tr v-for="p in batchProductions" :key="p.id" class="hover:bg-muted/30">
                                     <td class="px-4 py-3 font-semibold text-foreground whitespace-nowrap">{{ formatDate(p.production_date) }}</td>
                                     <td class="px-4 py-3 whitespace-nowrap capitalize text-muted-foreground">{{ p.production_time }}</td>
-                                    <td class="px-4 py-3 text-right font-medium whitespace-nowrap text-blue-600 dark:text-blue-400">{{ p.nylon_used_kg }} KG</td>
                                     <td class="px-4 py-3 text-right font-medium whitespace-nowrap text-purple-600 dark:text-purple-400">{{ p.packing_nylon_used }} Pcs</td>
                                     <td class="px-4 py-3 text-right font-bold text-foreground whitespace-nowrap">{{ p.bags_produced }} Bags</td>
                                     <td class="px-4 py-3 text-xs text-muted-foreground max-w-xs truncate">{{ p.remarks || 'N/A' }}</td>
@@ -463,7 +459,6 @@ const deleteProductionRun = (runId: number) => {
                     <div class="space-y-3 p-3 rounded-lg bg-muted/30 border border-border/40">
                         <div class="flex items-center justify-between border-b pb-2">
                             <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Material Cost & Quality Loss</span>
-                            <span class="text-xs font-mono text-purple-600 dark:text-purple-400 font-semibold">{{ batch.quantity_used_kg }} KG Nylon</span>
                         </div>
                         <div class="space-y-2 text-sm">
                             <div class="flex justify-between items-center">
@@ -572,7 +567,7 @@ const deleteProductionRun = (runId: number) => {
                     <DialogFooter class="pt-4">
                         <Button type="button" variant="outline" @click="isProductionModalOpen = false">Cancel</Button>
                         <Button type="submit" :disabled="productionForm.processing || batch.remaining_packing_pieces <= 0">
-                            Log Production Run
+                            Record Production Run
                         </Button>
                     </DialogFooter>
                 </form>

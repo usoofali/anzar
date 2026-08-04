@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['batch_no', 'raw_material_purchase_id', 'production_date', 'quantity_used_kg', 'bags_produced', 'produced_by', 'status'])]
+#[Fillable(['batch_no', 'raw_material_purchase_id', 'production_date', 'bags_produced', 'produced_by', 'status'])]
 class ProductionBatch extends Model
 {
     /** @use HasFactory<ProductionBatchFactory> */
@@ -19,7 +19,6 @@ class ProductionBatch extends Model
     {
         return [
             'production_date' => 'date:Y-m-d',
-            'quantity_used_kg' => 'decimal:2',
             'bags_produced' => 'integer',
         ];
     }
@@ -41,7 +40,6 @@ class ProductionBatch extends Model
 
     public function updateAggregates(): void
     {
-        $this->quantity_used_kg = (float) $this->batchProductions()->sum('nylon_used_kg');
         $this->bags_produced = (int) $this->batchProductions()->sum('bags_produced');
         $this->save();
     }
@@ -122,5 +120,12 @@ class ProductionBatch extends Model
     public function getReplacementIssuedAttribute(): int
     {
         return (int) $this->leakageReturns()->sum('replacement_issued');
+    }
+
+    public function getRemainingPackingPiecesAttribute(): int
+    {
+        $totalPackingUsed = (int) $this->batchProductions()->sum('packing_nylon_used');
+
+        return max(0, ($this->rawMaterialPurchase->packing_nylon_pieces ?? 0) - $totalPackingUsed);
     }
 }

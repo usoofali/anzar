@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['production_batch_id', 'production_date', 'production_time', 'nylon_used_kg', 'packing_nylon_used', 'bags_produced', 'produced_by', 'remarks'])]
+#[Fillable(['production_batch_id', 'production_date', 'production_time', 'packing_nylon_used', 'bags_produced', 'produced_by', 'remarks'])]
 class BatchProduction extends Model
 {
     /** @use HasFactory<BatchProductionFactory> */
@@ -18,7 +18,6 @@ class BatchProduction extends Model
     {
         return [
             'production_date' => 'date:Y-m-d',
-            'nylon_used_kg' => 'decimal:2',
             'packing_nylon_used' => 'integer',
             'bags_produced' => 'integer',
         ];

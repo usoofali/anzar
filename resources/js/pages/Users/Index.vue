@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
-import { KeyRound, Plus, Search, Trash2, UserCheck, UserPlus, Users as UsersIcon } from '@lucide/vue';
+import { KeyRound, MoreHorizontal, Pencil, Plus, Search, Trash2, UserCheck, UserPlus, Users as UsersIcon } from '@lucide/vue';
 import { toast } from 'vue-sonner';
 import StatusBadge from '@/components/ui/StatusBadge.vue';
 import ConfirmModal from '@/components/ui/ConfirmModal.vue';
@@ -9,6 +9,14 @@ import EmptyState from '@/components/ui/EmptyState.vue';
 import Pagination from '@/components/ui/Pagination.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
     Dialog,
     DialogContent,
@@ -248,16 +256,32 @@ const roleLabel = (role: string) => {
                                     <td class="px-4 py-3 whitespace-nowrap">
                                         <StatusBadge :status="u.status" />
                                     </td>
-                                    <td class="px-4 py-3 text-right whitespace-nowrap space-x-2">
-                                        <Button variant="outline" size="sm" class="h-8 px-2 text-xs" @click="openEditModal(u)">
-                                            Edit
-                                        </Button>
-                                        <Button variant="outline" size="sm" class="h-8 px-2 text-xs text-amber-600 dark:text-amber-400 hover:text-amber-700" @click="openResetModal(u.id)">
-                                            <KeyRound class="h-3.5 w-3.5" />
-                                        </Button>
-                                        <Button variant="ghost" size="sm" class="h-8 px-2 text-xs text-rose-600 hover:text-rose-700" @click="openDeleteModal(u)">
-                                            <Trash2 class="h-3.5 w-3.5" />
-                                        </Button>
+                                    <td class="px-4 py-3 text-right whitespace-nowrap">
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger as-child>
+                                                <Button variant="ghost" size="sm" class="h-8 w-8 p-0 hover:bg-muted">
+                                                    <MoreHorizontal class="h-4 w-4 text-muted-foreground" />
+                                                    <span class="sr-only">Open menu</span>
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end" class="w-48">
+                                                <DropdownMenuLabel class="text-xs font-normal text-muted-foreground">Actions</DropdownMenuLabel>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem @select="openEditModal(u)" class="flex items-center gap-2 cursor-pointer text-xs">
+                                                    <Pencil class="h-4 w-4 text-blue-500" />
+                                                    <span>Edit User Profile</span>
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem @select="openResetModal(u.id)" class="flex items-center gap-2 cursor-pointer text-xs">
+                                                    <KeyRound class="h-4 w-4 text-amber-500" />
+                                                    <span>Reset Password</span>
+                                                </DropdownMenuItem>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem @select="openDeleteModal(u)" class="flex items-center gap-2 cursor-pointer text-xs text-rose-600 dark:text-rose-400 focus:text-rose-600 focus:bg-rose-50 dark:focus:bg-rose-950/50">
+                                                    <Trash2 class="h-4 w-4 text-rose-500" />
+                                                    <span>Delete Staff Account</span>
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                     </td>
                                 </tr>
                             </tbody>

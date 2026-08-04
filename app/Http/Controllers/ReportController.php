@@ -105,7 +105,6 @@ class ReportController extends Controller
             ->map(fn ($b) => [
                 'batch_no' => $b->batch_no,
                 'production_date' => $b->production_date->format('Y-m-d'),
-                'nylon_used_kg' => (float) $b->quantity_used_kg,
                 'bags_produced' => (int) $b->bags_produced,
             ])->toArray();
     }

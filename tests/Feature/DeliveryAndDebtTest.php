@@ -25,7 +25,6 @@ test('recording delivery underpaid automatically creates open customer debt', fu
         'batch_no' => 'PB-DEL-1',
         'raw_material_purchase_id' => $purchase->id,
         'production_date' => '2026-07-31',
-        'quantity_used_kg' => 25.00,
         'bags_produced' => 200,
         'status' => 'active',
     ]);

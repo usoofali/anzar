@@ -100,7 +100,7 @@ const formatMoney = (amount: number) => {
 <template>
     <Head title="Reports & Analytics - ANZAR Table Water" />
 
-    <div class="space-y-6 p-4 sm:p-6">
+    <div class="space-y-6 p-4 sm:p-6 w-full max-w-full overflow-hidden">
         <!-- Printable Header for PDF Export -->
         <div class="hidden print:block">
             <PrintableReportHeader
@@ -144,7 +144,7 @@ const formatMoney = (amount: number) => {
         </div>
 
         <!-- Report Selector Grid & Date Filters (Screen only) -->
-        <div class="grid gap-6 lg:grid-cols-4 print:hidden">
+        <div class="grid w-full min-w-0 gap-6 lg:grid-cols-4 print:hidden">
             <!-- Sidebar Selection Menu (Desktop) -->
             <Card class="hidden lg:block lg:col-span-1">
                 <CardHeader class="pb-3">
@@ -166,9 +166,9 @@ const formatMoney = (amount: number) => {
             </Card>
 
             <!-- Main Filter & Preview Pane -->
-            <div class="lg:col-span-3 space-y-6">
+            <div class="w-full min-w-0 space-y-6 lg:col-span-3">
                 <!-- Filters Bar -->
-                <Card>
+                <Card class="w-full min-w-0 overflow-hidden">
                     <CardContent class="pt-4">
                         <form @submit.prevent="generateReport" class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 items-end">
                             <div class="space-y-1">
@@ -208,7 +208,7 @@ const formatMoney = (amount: number) => {
                 </Card>
 
                 <!-- Report Output Preview Area -->
-                <Card>
+                <Card class="w-full min-w-0 overflow-hidden">
                     <CardHeader class="border-b pb-3">
                         <CardTitle class="text-lg font-bold">
                             {{ reportTypes.find(r => r.id === currentType)?.name }}
@@ -256,7 +256,6 @@ const formatMoney = (amount: number) => {
                                             <th class="px-3 py-2">Batch No</th>
                                             <th class="px-3 py-2">Date</th>
                                             <th class="px-3 py-2">Supplier</th>
-                                            <th class="px-3 py-2 text-right">KG Used</th>
                                             <th class="px-3 py-2 text-right">Bags Produced</th>
                                         </tr>
                                     </thead>
@@ -265,7 +264,6 @@ const formatMoney = (amount: number) => {
                                             <td class="px-3 py-2 font-semibold text-foreground whitespace-nowrap">{{ row.batch_no }}</td>
                                             <td class="px-3 py-2 text-muted-foreground whitespace-nowrap">{{ formatDate(row.production_date) }}</td>
                                             <td class="px-3 py-2 text-xs whitespace-nowrap">{{ row.supplier || 'N/A' }}</td>
-                                            <td class="px-3 py-2 text-right font-bold whitespace-nowrap">{{ row.nylon_used_kg }} KG</td>
                                             <td class="px-3 py-2 text-right font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">{{ row.bags_produced }}</td>
                                         </tr>
                                     </tbody>

@@ -32,7 +32,6 @@ test('production staff can create production batch linked to nylon purchase', fu
     $this->assertDatabaseHas('production_batches', [
         'raw_material_purchase_id' => $purchase->id,
         'bags_produced' => 300,
-        'quantity_used_kg' => 18.00, // 300 * (30.00 / 500)
         'status' => 'active',
     ]);
 });
@@ -53,7 +52,6 @@ test('manager can close and reopen a production batch', function () {
         'batch_no' => 'PB-999',
         'raw_material_purchase_id' => $purchase->id,
         'production_date' => '2026-07-31',
-        'quantity_used_kg' => 20.00,
         'bags_produced' => 200,
         'produced_by' => $manager->id,
         'status' => 'active',

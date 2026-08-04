@@ -27,7 +27,6 @@ test('debt payment reduces outstanding amount and settles debt when zero', funct
         'batch_no' => 'PB-DEBT-1',
         'raw_material_purchase_id' => $purchase->id,
         'production_date' => '2026-07-31',
-        'quantity_used_kg' => 20.00,
         'bags_produced' => 200,
         'status' => 'active',
     ]);

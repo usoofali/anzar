@@ -68,7 +68,6 @@ class DashboardController extends Controller
                     'id' => $batch->id,
                     'batch_no' => $batch->batch_no,
                     'production_date' => $batch->production_date->format('Y-m-d'),
-                    'quantity_used_kg' => $batch->quantity_used_kg,
                     'bags_produced' => $batch->bags_produced,
                     'bags_delivered' => $batch->bags_delivered,
                     'remaining_stock' => $batch->remaining_stock,

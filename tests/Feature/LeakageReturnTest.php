@@ -26,7 +26,6 @@ test('staff can record leakage returns in pieces', function () {
         'batch_no' => 'PB-LEAK-1',
         'raw_material_purchase_id' => $purchase->id,
         'production_date' => '2026-07-31',
-        'quantity_used_kg' => 10.00,
         'bags_produced' => 100,
         'status' => 'active',
     ]);

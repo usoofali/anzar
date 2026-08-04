@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
-import { ArrowUpRight, Eye, Factory, Lock, Plus, Search, Trash2, Unlock } from '@lucide/vue';
+import { ArrowUpRight, Eye, Factory, Lock, MoreHorizontal, Plus, Search, Trash2, Unlock } from '@lucide/vue';
 import { toast } from 'vue-sonner';
 import StatusBadge from '@/components/ui/StatusBadge.vue';
 import ConfirmModal from '@/components/ui/ConfirmModal.vue';
@@ -9,6 +9,14 @@ import EmptyState from '@/components/ui/EmptyState.vue';
 import Pagination from '@/components/ui/Pagination.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
     Dialog,
     DialogContent,
@@ -32,7 +40,6 @@ interface BatchItem {
     batch_no: string;
     production_date: string;
     raw_material: string;
-    quantity_used_kg: number;
     bags_produced: number;
     bags_delivered: number;
     remaining_stock: number;
@@ -42,6 +49,7 @@ interface BatchItem {
     total_collected: number;
     outstanding_credit: number;
     returned_pieces: number;
+    remaining_packing_pieces?: number;
 }
 
 interface RawMaterial {
@@ -108,6 +116,36 @@ const submitForm = () => {
             toast.success('Production batch created successfully.');
         },
         onError: () => toast.error('Failed to create production batch.'),
+    });
+};
+
+// Sub-production Run Modal
+const isRunModalOpen = ref(false);
+const selectedBatchForRun = ref<BatchItem | null>(null);
+const runForm = useForm({
+    production_date: new Date().toISOString().split('T')[0],
+    production_time: 'morning',
+    bags_produced: '' as any,
+    remarks: '',
+});
+
+const openRunModal = (batch: BatchItem) => {
+    selectedBatchForRun.value = batch;
+    runForm.reset();
+    runForm.production_date = new Date().toISOString().split('T')[0];
+    isRunModalOpen.value = true;
+};
+
+const submitRunForm = () => {
+    if (!selectedBatchForRun.value) return;
+    runForm.post(`/production-batches/${selectedBatchForRun.value.id}/productions`, {
+        onSuccess: () => {
+            isRunModalOpen.value = false;
+            runForm.reset();
+            selectedBatchForRun.value = null;
+            toast.success('Production run logged successfully.');
+        },
+        onError: () => toast.error('Failed to log production run. Please check remaining limits.'),
     });
 };
 
@@ -241,20 +279,38 @@ const formatMoney = (amount: number) => {
                                     <td class="px-4 py-3 text-center whitespace-nowrap">
                                         <StatusBadge :status="b.status" />
                                     </td>
-                                    <td class="px-4 py-3 text-right whitespace-nowrap space-x-1">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            class="h-8 px-2 text-xs"
-                                            :class="b.status === 'active' ? 'text-amber-600 dark:text-amber-400 hover:text-amber-700' : 'text-blue-600 dark:text-blue-400 hover:text-blue-700'"
-                                            @click="openToggleModal(b)"
-                                        >
-                                            <component :is="b.status === 'active' ? Lock : Unlock" class="h-3.5 w-3.5 mr-1" />
-                                            {{ b.status === 'active' ? 'Close' : 'Reopen' }}
-                                        </Button>
-                                        <Button variant="ghost" size="sm" class="h-8 px-2 text-xs text-rose-600 hover:text-rose-700" @click="openDeleteModal(b)">
-                                            <Trash2 class="h-3.5 w-3.5" />
-                                        </Button>
+                                    <td class="px-4 py-3 text-right whitespace-nowrap">
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger as-child>
+                                                <Button variant="ghost" size="sm" class="h-8 w-8 p-0 hover:bg-muted">
+                                                    <MoreHorizontal class="h-4 w-4 text-muted-foreground" />
+                                                    <span class="sr-only">Open menu</span>
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end" class="w-48">
+                                                <DropdownMenuLabel class="text-xs font-normal text-muted-foreground">Actions</DropdownMenuLabel>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem as-child>
+                                                    <Link :href="`/production-batches/${b.id}`" class="flex items-center gap-2 cursor-pointer text-xs">
+                                                        <Eye class="h-4 w-4 text-blue-500" />
+                                                        <span>View Details</span>
+                                                    </Link>
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem v-if="b.status === 'active'" @select="openRunModal(b)" class="flex items-center gap-2 cursor-pointer text-xs">
+                                                    <Plus class="h-4 w-4 text-emerald-500" />
+                                                    <span>Record Production Run</span>
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem @select="openToggleModal(b)" class="flex items-center gap-2 cursor-pointer text-xs">
+                                                    <component :is="b.status === 'active' ? Lock : Unlock" class="h-4 w-4" :class="b.status === 'active' ? 'text-amber-500' : 'text-cyan-500'" />
+                                                    <span>{{ b.status === 'active' ? 'Close Batch' : 'Reopen Batch' }}</span>
+                                                </DropdownMenuItem>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem @select="openDeleteModal(b)" class="flex items-center gap-2 cursor-pointer text-xs text-rose-600 dark:text-rose-400 focus:text-rose-600 focus:bg-rose-50 dark:focus:bg-rose-950/50">
+                                                    <Trash2 class="h-4 w-4 text-rose-500" />
+                                                    <span>Delete Batch</span>
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                     </td>
                                 </tr>
                             </tbody>
@@ -347,6 +403,65 @@ const formatMoney = (amount: number) => {
             :variant="togglingBatch?.status === 'active' ? 'warning' : 'default'"
             @confirm="confirmToggleStatus"
         />
+
+        <!-- Record Sub-Production Run Dialog -->
+        <Dialog :open="isRunModalOpen" @update:open="isRunModalOpen = $event">
+            <DialogContent class="sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Record Production Run - Batch {{ selectedBatchForRun?.batch_no }}</DialogTitle>
+                    <DialogDescription>Add a new sub-production run to accumulate under this batch.</DialogDescription>
+                </DialogHeader>
+
+                <form @submit.prevent="submitRunForm" class="space-y-4 py-2">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <Label for="sub_production_date">Production Date</Label>
+                            <Input id="sub_production_date" type="date" v-model="runForm.production_date" required />
+                        </div>
+                        <div class="space-y-1">
+                            <Label for="sub_production_time">Production Shift</Label>
+                            <select
+                                id="sub_production_time"
+                                v-model="runForm.production_time"
+                                required
+                                class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring dark:bg-slate-900 dark:border-slate-800"
+                            >
+                                <option value="morning">Morning</option>
+                                <option value="afternoon">Afternoon</option>
+                                <option value="evening">Evening</option>
+                                <option value="night">Night</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1">
+                        <Label for="sub_bags_produced">Bags Produced</Label>
+                        <Input
+                            id="sub_bags_produced"
+                            type="number"
+                            min="1"
+                            :max="selectedBatchForRun?.remaining_packing_pieces"
+                            v-model="runForm.bags_produced"
+                            required
+                            :placeholder="`Max: ${selectedBatchForRun?.remaining_packing_pieces ?? 0} Bags`"
+                        />
+                        <p class="text-[10px] text-muted-foreground">Available Outer Bags: {{ selectedBatchForRun?.remaining_packing_pieces ?? 0 }} Bags</p>
+                    </div>
+
+                    <div class="space-y-1">
+                        <Label for="sub_remarks">Remarks (Optional)</Label>
+                        <Input id="sub_remarks" v-model="runForm.remarks" placeholder="e.g. Afternoon shift production" />
+                    </div>
+
+                    <DialogFooter class="pt-4">
+                        <Button type="button" variant="outline" @click="isRunModalOpen = false">Cancel</Button>
+                        <Button type="submit" :disabled="runForm.processing || (selectedBatchForRun?.remaining_packing_pieces ?? 0) <= 0">
+                            Record Production Run
+                        </Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
 
         <!-- Delete Confirmation Modal -->
         <ConfirmModal

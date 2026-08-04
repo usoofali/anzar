@@ -24,7 +24,6 @@ class BatchProductionFactory extends Factory
         return [
             'production_batch_id' => ProductionBatch::factory(),
             'production_date' => fake()->date(),
-            'nylon_used_kg' => fake()->randomFloat(2, 1, 10),
             'packing_nylon_used' => $bags,
             'bags_produced' => $bags,
             'produced_by' => User::factory(),

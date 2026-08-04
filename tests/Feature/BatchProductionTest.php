@@ -33,13 +33,11 @@ test('initial production run is created automatically when batch is created', fu
 
     $batch = ProductionBatch::first();
     $this->assertNotNull($batch);
-    $this->assertEquals(5.00, $batch->quantity_used_kg);
     $this->assertEquals(100, $batch->bags_produced);
 
     // Verify first BatchProduction record
     $this->assertDatabaseHas('batch_productions', [
         'production_batch_id' => $batch->id,
-        'nylon_used_kg' => 5.00,
         'bags_produced' => 100,
         'packing_nylon_used' => 100,
     ]);
@@ -63,7 +61,6 @@ test('staff can record subsequent sub-production runs within purchase limits', f
         'batch_no' => 'PB-T101',
         'raw_material_purchase_id' => $purchase->id,
         'production_date' => '2026-08-04',
-        'quantity_used_kg' => 5.00,
         'bags_produced' => 100,
         'produced_by' => $user->id,
         'status' => 'active',
@@ -72,7 +69,6 @@ test('staff can record subsequent sub-production runs within purchase limits', f
     // Seed first run
     $batch->batchProductions()->create([
         'production_date' => '2026-08-04',
-        'nylon_used_kg' => 5.00,
         'packing_nylon_used' => 100,
         'bags_produced' => 100,
         'produced_by' => $user->id,
@@ -90,7 +86,6 @@ test('staff can record subsequent sub-production runs within purchase limits', f
     $batch->refresh();
 
     // Aggregates should be updated
-    $this->assertEquals(15.00, $batch->quantity_used_kg);
     $this->assertEquals(300, $batch->bags_produced);
 
     // Recording run exceeding remaining packing nylon should fail validation
@@ -120,7 +115,6 @@ test('manager can delete sub-production runs and aggregates update dynamically',
         'batch_no' => 'PB-T102',
         'raw_material_purchase_id' => $purchase->id,
         'production_date' => '2026-08-04',
-        'quantity_used_kg' => 15.00,
         'bags_produced' => 300,
         'produced_by' => $manager->id,
         'status' => 'active',
@@ -128,7 +122,6 @@ test('manager can delete sub-production runs and aggregates update dynamically',
 
     $run1 = $batch->batchProductions()->create([
         'production_date' => '2026-08-04',
-        'nylon_used_kg' => 5.00,
         'packing_nylon_used' => 100,
         'bags_produced' => 100,
         'produced_by' => $manager->id,
@@ -136,7 +129,6 @@ test('manager can delete sub-production runs and aggregates update dynamically',
 
     $run2 = $batch->batchProductions()->create([
         'production_date' => '2026-08-05',
-        'nylon_used_kg' => 10.00,
         'packing_nylon_used' => 200,
         'bags_produced' => 200,
         'produced_by' => $manager->id,
@@ -144,7 +136,6 @@ test('manager can delete sub-production runs and aggregates update dynamically',
 
     // Initial check
     $batch->updateAggregates();
-    $this->assertEquals(15.00, $batch->quantity_used_kg);
     $this->assertEquals(300, $batch->bags_produced);
 
     // Delete run2
@@ -153,6 +144,5 @@ test('manager can delete sub-production runs and aggregates update dynamically',
 
     $batch->refresh();
     // Aggregates should reflect run1 only now
-    $this->assertEquals(5.00, $batch->quantity_used_kg);
     $this->assertEquals(100, $batch->bags_produced);
 });
