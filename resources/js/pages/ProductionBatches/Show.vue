@@ -551,12 +551,10 @@ const deleteProductionRun = (runId: number) => {
                             id="run_bags_produced"
                             type="number"
                             min="1"
-                            :max="batch.remaining_packing_pieces"
                             v-model="productionForm.bags_produced"
                             required
-                            :placeholder="`Max: ${batch.remaining_packing_pieces} Bags`"
+                            placeholder="e.g. 150 Bags"
                         />
-                        <p class="text-[10px] text-muted-foreground">Available: {{ batch.remaining_packing_pieces }} Bags</p>
                     </div>
 
                     <div class="space-y-1">
@@ -566,7 +564,7 @@ const deleteProductionRun = (runId: number) => {
 
                     <DialogFooter class="pt-4">
                         <Button type="button" variant="outline" @click="isProductionModalOpen = false">Cancel</Button>
-                        <Button type="submit" :disabled="productionForm.processing || batch.remaining_packing_pieces <= 0">
+                        <Button type="submit" :disabled="productionForm.processing">
                             Record Production Run
                         </Button>
                     </DialogFooter>

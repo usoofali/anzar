@@ -88,13 +88,14 @@ test('staff can record subsequent sub-production runs within purchase limits', f
     // Aggregates should be updated
     $this->assertEquals(300, $batch->bags_produced);
 
-    // Recording run exceeding remaining packing nylon should fail validation
+    // Recording additional run without max constraints should succeed
     $response2 = $this->actingAs($user)->post("/production-batches/{$batch->id}/productions", [
         'production_date' => '2026-08-06',
         'production_time' => 'evening',
-        'bags_produced' => 300, // Remaining is 100 (400 - 300), so 300 should fail
+        'bags_produced' => 300,
     ]);
-    $response2->assertSessionHasErrors(['bags_produced']);
+    $response2->assertRedirect();
+    $this->assertEquals(600, $batch->fresh()->bags_produced);
 });
 
 test('manager can delete sub-production runs and aggregates update dynamically', function () {

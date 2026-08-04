@@ -440,12 +440,10 @@ const formatMoney = (amount: number) => {
                             id="sub_bags_produced"
                             type="number"
                             min="1"
-                            :max="selectedBatchForRun?.remaining_packing_pieces"
                             v-model="runForm.bags_produced"
                             required
-                            :placeholder="`Max: ${selectedBatchForRun?.remaining_packing_pieces ?? 0} Bags`"
+                            placeholder="e.g. 150 Bags"
                         />
-                        <p class="text-[10px] text-muted-foreground">Available Outer Bags: {{ selectedBatchForRun?.remaining_packing_pieces ?? 0 }} Bags</p>
                     </div>
 
                     <div class="space-y-1">
@@ -455,7 +453,7 @@ const formatMoney = (amount: number) => {
 
                     <DialogFooter class="pt-4">
                         <Button type="button" variant="outline" @click="isRunModalOpen = false">Cancel</Button>
-                        <Button type="submit" :disabled="runForm.processing || (selectedBatchForRun?.remaining_packing_pieces ?? 0) <= 0">
+                        <Button type="submit" :disabled="runForm.processing">
                             Record Production Run
                         </Button>
                     </DialogFooter>

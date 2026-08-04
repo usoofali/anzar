@@ -74,10 +74,6 @@ class ProductionBatchController extends Controller
 
         $purchase = RawMaterialPurchase::findOrFail($validated['raw_material_purchase_id']);
 
-        if ($validated['bags_produced'] > $purchase->packing_nylon_pieces) {
-            return back()->withErrors(['bags_produced' => 'Bags produced cannot exceed purchased packing nylon pieces ('.$purchase->packing_nylon_pieces.')']);
-        }
-
         $batchCount = ProductionBatch::count() + 1;
         $batchNo = 'PB-'.str_pad((string) $batchCount, 3, '0', STR_PAD_LEFT);
 
@@ -197,12 +193,10 @@ class ProductionBatchController extends Controller
             return back()->with('error', 'Cannot record production for a closed batch.');
         }
 
-        $remainingPacking = $productionBatch->remaining_packing_pieces;
-
         $validated = $request->validate([
             'production_date' => ['required', 'date'],
             'production_time' => ['required', 'string', 'in:morning,afternoon,evening,night'],
-            'bags_produced' => ['required', 'integer', 'min:1', 'max:'.$remainingPacking],
+            'bags_produced' => ['required', 'integer', 'min:1'],
             'remarks' => ['nullable', 'string'],
         ]);
 
@@ -212,7 +206,7 @@ class ProductionBatchController extends Controller
             'packing_nylon_used' => $validated['bags_produced'],
             'bags_produced' => $validated['bags_produced'],
             'produced_by' => auth()->id(),
-            'remarks' => $validated['remarks'],
+            'remarks' => $validated['remarks'] ?? null,
         ]);
 
         $productionBatch->updateAggregates();
