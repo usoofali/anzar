@@ -80,23 +80,23 @@ const triggerPrint = () => {
         </div>
 
         <!-- Page Action Bar -->
-        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between print:hidden">
-            <div class="flex items-center gap-3">
-                <Link href="/production-batches">
-                    <Button variant="outline" size="sm" class="gap-1">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between print:hidden">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <Link href="/production-batches" class="w-fit">
+                    <Button variant="outline" size="sm" class="gap-1.5 w-full sm:w-auto">
                         <ArrowLeft class="h-4 w-4" /> Back to Batches
                     </Button>
                 </Link>
                 <div>
-                    <div class="flex items-center gap-2">
-                        <h1 class="text-2xl font-bold tracking-tight text-foreground">Batch {{ batch.batch_no }}</h1>
+                    <div class="flex items-center gap-2.5 flex-wrap">
+                        <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-foreground">Batch {{ batch.batch_no }}</h1>
                         <StatusBadge :status="batch.status" />
                     </div>
-                    <p class="text-sm text-muted-foreground">Produced on {{ formatDate(batch.production_date) }} by {{ batch.produced_by }}</p>
+                    <p class="text-xs sm:text-sm text-muted-foreground mt-0.5">Produced on {{ formatDate(batch.production_date) }} by {{ batch.produced_by }}</p>
                 </div>
             </div>
-            <div class="flex items-center gap-2">
-                <Button variant="outline" class="gap-1.5" @click="triggerPrint">
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+                <Button variant="outline" size="sm" class="gap-1.5 w-full sm:w-auto justify-center" @click="triggerPrint">
                     <Printer class="h-4 w-4" /> Print / Export PDF
                 </Button>
             </div>
@@ -119,7 +119,7 @@ const triggerPrint = () => {
                     <CardTitle class="text-xs font-semibold uppercase text-muted-foreground">Distribution & Stock</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div class="text-xl font-bold text-emerald-600">{{ batch.bags_delivered.toLocaleString() }} Delivered</div>
+                    <div class="text-xl font-bold text-emerald-600 dark:text-emerald-400">{{ batch.bags_delivered.toLocaleString() }} Delivered</div>
                     <p class="text-xs text-muted-foreground mt-1">{{ batch.remaining_stock }} Bags Remaining Stock</p>
                 </CardContent>
             </Card>
@@ -129,7 +129,7 @@ const triggerPrint = () => {
                     <CardTitle class="text-xs font-semibold uppercase text-muted-foreground">Batch Collections</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div class="text-xl font-bold text-blue-600">{{ formatMoney(batch.total_collected) }}</div>
+                    <div class="text-xl font-bold text-blue-600 dark:text-blue-400">{{ formatMoney(batch.total_collected) }}</div>
                     <p class="text-xs text-muted-foreground mt-1">Cash: {{ formatMoney(batch.cash_collected) }} | Transfer: {{ formatMoney(batch.transfer_collected) }}</p>
                 </CardContent>
             </Card>
@@ -139,7 +139,7 @@ const triggerPrint = () => {
                     <CardTitle class="text-xs font-semibold uppercase text-muted-foreground">Outstanding Credit & Quality</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div class="text-xl font-bold text-amber-600">{{ formatMoney(batch.outstanding_credit) }}</div>
+                    <div class="text-xl font-bold text-amber-600 dark:text-amber-400">{{ formatMoney(batch.outstanding_credit) }}</div>
                     <p class="text-xs text-muted-foreground mt-1">Leakages: {{ batch.returned_pieces }} Pcs ({{ batch.replacement_issued }} Replaced)</p>
                 </CardContent>
             </Card>
@@ -147,32 +147,32 @@ const triggerPrint = () => {
 
         <!-- Tab Navigation & Transaction Tables -->
         <Card>
-            <CardHeader class="border-b pb-3 print:hidden">
-                <div class="flex items-center gap-4">
+            <CardHeader class="border-b pb-3 print:hidden px-4 sm:px-6">
+                <div class="flex items-center gap-2 overflow-x-auto pb-1 whitespace-nowrap">
                     <button
-                        class="pb-2 text-sm font-semibold border-b-2 transition-colors"
-                        :class="activeTab === 'deliveries' ? 'border-blue-600 text-blue-600' : 'border-transparent text-muted-foreground hover:text-foreground'"
+                        class="px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-colors whitespace-nowrap shrink-0"
+                        :class="activeTab === 'deliveries' ? 'bg-blue-600 text-white font-semibold shadow-sm' : 'bg-muted/40 text-muted-foreground hover:text-foreground hover:bg-muted'"
                         @click="activeTab = 'deliveries'"
                     >
                         Deliveries ({{ deliveries.length }})
                     </button>
                     <button
-                        class="pb-2 text-sm font-semibold border-b-2 transition-colors"
-                        :class="activeTab === 'collections' ? 'border-blue-600 text-blue-600' : 'border-transparent text-muted-foreground hover:text-foreground'"
+                        class="px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-colors whitespace-nowrap shrink-0"
+                        :class="activeTab === 'collections' ? 'bg-blue-600 text-white font-semibold shadow-sm' : 'bg-muted/40 text-muted-foreground hover:text-foreground hover:bg-muted'"
                         @click="activeTab = 'collections'"
                     >
                         Daily Collections ({{ dailyCollections.length }})
                     </button>
                     <button
-                        class="pb-2 text-sm font-semibold border-b-2 transition-colors"
-                        :class="activeTab === 'debts' ? 'border-blue-600 text-blue-600' : 'border-transparent text-muted-foreground hover:text-foreground'"
+                        class="px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-colors whitespace-nowrap shrink-0"
+                        :class="activeTab === 'debts' ? 'bg-blue-600 text-white font-semibold shadow-sm' : 'bg-muted/40 text-muted-foreground hover:text-foreground hover:bg-muted'"
                         @click="activeTab = 'debts'"
                     >
                         Outstanding Debts ({{ customerDebts.length }})
                     </button>
                     <button
-                        class="pb-2 text-sm font-semibold border-b-2 transition-colors"
-                        :class="activeTab === 'leakages' ? 'border-blue-600 text-blue-600' : 'border-transparent text-muted-foreground hover:text-foreground'"
+                        class="px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-colors whitespace-nowrap shrink-0"
+                        :class="activeTab === 'leakages' ? 'bg-blue-600 text-white font-semibold shadow-sm' : 'bg-muted/40 text-muted-foreground hover:text-foreground hover:bg-muted'"
                         @click="activeTab = 'leakages'"
                     >
                         Leakage Returns ({{ leakageReturns.length }})

@@ -375,7 +375,7 @@
     ]
   },
   "resources/css/app.css": {
-    "file": "assets/app-DaGVcO_t.css",
+    "file": "assets/app-D70U_np6.css",
     "name": "app",
     "names": [
       "app.css"
@@ -384,7 +384,7 @@
     "isEntry": true
   },
   "resources/js/app.ts": {
-    "file": "assets/app-67FNsBtS.js",
+    "file": "assets/app-CroWCpC0.js",
     "name": "app",
     "src": "resources/js/app.ts",
     "isEntry": true,
@@ -595,7 +595,7 @@
     ]
   },
   "resources/js/pages/ProductionBatches/Show.vue": {
-    "file": "assets/Show-BU5NvZhF.js",
+    "file": "assets/Show-BLw1miMy.js",
     "name": "Show",
     "src": "resources/js/pages/ProductionBatches/Show.vue",
     "isDynamicEntry": true,

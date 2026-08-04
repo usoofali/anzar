@@ -122,14 +122,14 @@ const formatMoney = (amount: number) => {
 <template>
     <Head title="Operational Expenses - ANZAR Table Water" />
 
-    <div class="space-y-4 sm:space-y-6 p-4 sm:p-6">
+    <div class="space-y-6 p-6">
         <!-- Header Banner -->
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-foreground">Operational Running Expenses</h1>
-                <p class="text-xs sm:text-sm text-muted-foreground">Log factory operating costs independent of production batches.</p>
+                <h1 class="text-2xl font-bold tracking-tight text-foreground">Operational Running Expenses</h1>
+                <p class="text-sm text-muted-foreground">Log factory operating costs independent of production batches.</p>
             </div>
-            <Button class="w-full sm:w-auto justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 shrink-0" @click="openModal">
+            <Button class="gap-1.5 bg-blue-600 hover:bg-blue-700" @click="openModal">
                 <Plus class="h-4 w-4" /> Record Expense
             </Button>
         </div>
