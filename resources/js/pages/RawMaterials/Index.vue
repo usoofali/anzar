@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { Boxes, Plus, Search, Trash2 } from '@lucide/vue';
-import ConfirmModal from '@/components/ConfirmModal.vue';
+import ConfirmModal from '@/components/ui/ConfirmModal.vue';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
