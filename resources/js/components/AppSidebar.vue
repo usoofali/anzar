@@ -25,6 +25,7 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
+    useSidebar,
 } from '@/components/ui/sidebar';
 import { useCurrentUrl } from '@/composables/useCurrentUrl';
 
@@ -35,6 +36,13 @@ const isProduction = isManager || user?.role === 'production_staff';
 const isSales = isManager || user?.role === 'sales_staff';
 
 const { isCurrentUrl } = useCurrentUrl();
+const { isMobile, setOpenMobile } = useSidebar();
+
+const handleNavClick = () => {
+    if (isMobile.value) {
+        setOpenMobile(false);
+    }
+};
 
 const navGroups = [
     {
@@ -87,7 +95,7 @@ const navGroups = [
             <SidebarMenu>
                 <SidebarMenuItem>
                     <SidebarMenuButton size="lg" as-child>
-                        <Link href="/dashboard">
+                        <Link href="/dashboard" @click="handleNavClick">
                             <AppLogo />
                         </Link>
                     </SidebarMenuButton>
@@ -106,7 +114,7 @@ const navGroups = [
                                 :is-active="isCurrentUrl(item.href)"
                                 :tooltip="item.title"
                             >
-                                <Link :href="item.href">
+                                <Link :href="item.href" @click="handleNavClick">
                                     <component :is="item.icon" />
                                     <span>{{ item.title }}</span>
                                 </Link>

@@ -2,7 +2,8 @@
 import type { HTMLAttributes, Ref } from "vue"
 import { defaultDocument, useEventListener, useMediaQuery, useVModel } from "@vueuse/core"
 import { TooltipProvider } from "reka-ui"
-import { computed, ref } from "vue"
+import { computed, onUnmounted, ref } from "vue"
+import { router } from "@inertiajs/vue3"
 import { cn } from "@/lib/utils"
 import { provideSidebarContext, SIDEBAR_COOKIE_MAX_AGE, SIDEBAR_COOKIE_NAME, SIDEBAR_KEYBOARD_SHORTCUT, SIDEBAR_WIDTH, SIDEBAR_WIDTH_ICON } from "./utils"
 
@@ -37,6 +38,16 @@ function setOpen(value: boolean) {
 function setOpenMobile(value: boolean) {
   openMobile.value = value
 }
+
+const removeNavigateListener = router.on("start", () => {
+  if (isMobile.value) {
+    setOpenMobile(false)
+  }
+})
+
+onUnmounted(() => {
+  removeNavigateListener()
+})
 
 // Helper to toggle the sidebar.
 function toggleSidebar() {
