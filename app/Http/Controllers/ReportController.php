@@ -164,7 +164,7 @@ class ReportController extends Controller
                 'delivery_no' => $cd->delivery->delivery_no ?? 'N/A',
                 'delivery_date' => $cd->delivery->delivery_date ? $cd->delivery->delivery_date->format('Y-m-d') : 'N/A',
                 'outstanding_amount' => (float) $cd->outstanding_amount,
-                'age_days' => $cd->created_at->diffInDays(now()),
+                'age_days' => round($cd->created_at->diffInMinutes(now()) / 1440, 2),
             ])->toArray();
     }
 
