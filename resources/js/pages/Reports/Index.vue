@@ -100,7 +100,7 @@ const formatMoney = (amount: number) => {
 <template>
     <Head title="Reports & Analytics - ANZAR Table Water" />
 
-    <div class="space-y-6 p-6">
+    <div class="space-y-6 p-4 sm:p-6">
         <!-- Printable Header for PDF Export -->
         <div class="hidden print:block">
             <PrintableReportHeader
@@ -115,23 +115,38 @@ const formatMoney = (amount: number) => {
         <!-- Screen Header -->
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between print:hidden">
             <div>
-                <h1 class="text-2xl font-bold tracking-tight text-foreground">Management Reports & Analytics</h1>
-                <p class="text-sm text-muted-foreground">Comprehensive batch lifecycle reports, revenue summaries, and accounting statements.</p>
+                <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-foreground">Management Reports & Analytics</h1>
+                <p class="text-xs sm:text-sm text-muted-foreground">Comprehensive batch lifecycle reports, revenue summaries, and accounting statements.</p>
             </div>
             <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                <Button variant="outline" class="gap-1.5 w-full sm:w-auto" @click="triggerPrint">
+                <Button variant="outline" class="gap-1.5 w-full sm:w-auto text-xs sm:text-sm" @click="triggerPrint">
                     <Printer class="h-4 w-4" /> Print / Export PDF
                 </Button>
-                <Button variant="secondary" class="gap-1.5 w-full sm:w-auto" @click="exportCSV">
+                <Button variant="secondary" class="gap-1.5 w-full sm:w-auto text-xs sm:text-sm" @click="exportCSV">
                     <Download class="h-4 w-4" /> Export CSV
                 </Button>
             </div>
         </div>
 
+        <!-- Mobile Report Selection Dropdown -->
+        <div class="space-y-1.5 lg:hidden print:hidden">
+            <Label for="mobile_report_select" class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Select Report Module</Label>
+            <select
+                id="mobile_report_select"
+                :value="currentType"
+                @change="(e: any) => selectReportType(e.target.value)"
+                class="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm font-medium shadow-sm focus:outline-none focus:ring-1 focus:ring-ring dark:bg-slate-900 dark:border-slate-800"
+            >
+                <option v-for="rt in reportTypes" :key="rt.id" :value="rt.id">
+                    {{ rt.name }}
+                </option>
+            </select>
+        </div>
+
         <!-- Report Selector Grid & Date Filters (Screen only) -->
         <div class="grid gap-6 lg:grid-cols-4 print:hidden">
-            <!-- Sidebar Selection Menu -->
-            <Card class="lg:col-span-1">
+            <!-- Sidebar Selection Menu (Desktop) -->
+            <Card class="hidden lg:block lg:col-span-1">
                 <CardHeader class="pb-3">
                     <CardTitle class="text-base">Select Report</CardTitle>
                     <CardDescription>Choose standard report module</CardDescription>

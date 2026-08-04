@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $manager = User::create([
-            'name' => 'Alhaji Aminu Bello Manager',
+            'name' => 'Alhaji Manager',
             'email' => 'manager@anzar.com',
             'username' => 'manager',
             'phone' => '08031234567',

@@ -9,8 +9,10 @@ import {
     Factory,
     PackageCheck,
     Receipt,
+    ShieldCheck,
     Store,
     TrendingUp,
+    Users,
     Wallet,
 } from '@lucide/vue';
 import StatusBadge from '@/components/ui/StatusBadge.vue';
@@ -55,7 +57,8 @@ import { usePage } from '@inertiajs/vue3';
 
 const page = usePage();
 const user = page.props.auth?.user;
-const isManager = !user?.role || user?.role === 'manager';
+const isAdmin = user?.role === 'admin';
+const isManager = !user?.role || user?.role === 'manager' || isAdmin;
 const isProduction = isManager || user?.role === 'production_staff';
 const isSales = isManager || user?.role === 'sales_staff';
 
@@ -87,6 +90,26 @@ const formatMoney = (amount: number) => {
                 </Link>
             </div>
         </div>
+
+        <!-- Admin Workspace Banner -->
+        <Card v-if="isAdmin" class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white border-none shadow-md">
+            <CardContent class="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 rounded-lg bg-cyan-500/20 text-cyan-400">
+                        <ShieldCheck class="h-6 w-6" />
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-sm text-slate-100">System Overseer Workspace</h3>
+                        <p class="text-xs text-slate-300">You have administrative access to system analytics, security roles, and user management.</p>
+                    </div>
+                </div>
+                <Link href="/users" class="w-full sm:w-auto">
+                    <Button size="sm" class="bg-cyan-500 hover:bg-cyan-600 text-slate-950 font-semibold gap-1.5 w-full sm:w-auto whitespace-nowrap">
+                        <Users class="h-4 w-4" /> Manage System Users
+                    </Button>
+                </Link>
+            </CardContent>
+        </Card>
 
         <!-- Top Metric Cards Grid -->
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
