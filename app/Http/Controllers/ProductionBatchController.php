@@ -100,23 +100,52 @@ class ProductionBatchController extends Controller
             'leakageReturns.customer',
         ]);
 
+        $nylonCost = (float) ($productionBatch->rawMaterialPurchase->total_cost ?? 0);
+        $unitPricePerKg = (float) ($productionBatch->rawMaterialPurchase->unit_price ?? 0);
+        $bagsProduced = (int) $productionBatch->bags_produced;
+        $bagsDelivered = (int) $productionBatch->bags_delivered;
+        $costPerBag = $bagsProduced > 0 ? $nylonCost / $bagsProduced : 0;
+        $expectedRevenue = (float) $productionBatch->expected_revenue;
+        $totalCollected = (float) $productionBatch->total_collected;
+        $returnedPieces = (int) $productionBatch->returned_pieces;
+
+        // Average bag price & leakage loss value (20 sachet pieces per bag)
+        $avgPricePerBag = $bagsDelivered > 0 ? ($expectedRevenue / $bagsDelivered) : 0;
+        $pricePerPiece = $avgPricePerBag > 0 ? ($avgPricePerBag / 20) : 0;
+        $leakageLossValue = round($returnedPieces * $pricePerPiece, 2);
+
+        $grossProfit = $expectedRevenue - $nylonCost;
+        $netProfitAfterLeakage = $grossProfit - $leakageLossValue;
+        $realizedCashProfit = $totalCollected - $nylonCost;
+        $profitMarginPercent = $expectedRevenue > 0 ? round(($netProfitAfterLeakage / $expectedRevenue) * 100, 1) : 0;
+
         $summary = [
             'id' => $productionBatch->id,
             'batch_no' => $productionBatch->batch_no,
             'production_date' => $productionBatch->production_date->format('Y-m-d'),
+            'raw_material_supplier' => $productionBatch->rawMaterialPurchase->supplier ?? 'N/A',
+            'raw_material_purchase_no' => $productionBatch->rawMaterialPurchase->purchase_no ?? 'N/A',
             'quantity_used_kg' => (float) $productionBatch->quantity_used_kg,
-            'bags_produced' => (int) $productionBatch->bags_produced,
-            'bags_delivered' => (int) $productionBatch->bags_delivered,
+            'unit_price_per_kg' => $unitPricePerKg,
+            'nylon_cost' => $nylonCost,
+            'cost_per_bag' => round($costPerBag, 2),
+            'bags_produced' => $bagsProduced,
+            'bags_delivered' => $bagsDelivered,
             'remaining_stock' => (int) $productionBatch->remaining_stock,
             'produced_by' => $productionBatch->producedBy->name ?? 'N/A',
             'status' => $productionBatch->status,
-            'expected_revenue' => (float) $productionBatch->expected_revenue,
+            'expected_revenue' => $expectedRevenue,
             'cash_collected' => (float) $productionBatch->cash_collected,
             'transfer_collected' => (float) $productionBatch->transfer_collected,
-            'total_collected' => (float) $productionBatch->total_collected,
+            'total_collected' => $totalCollected,
             'outstanding_credit' => (float) $productionBatch->outstanding_credit,
-            'returned_pieces' => (int) $productionBatch->returned_pieces,
+            'returned_pieces' => $returnedPieces,
             'replacement_issued' => (int) $productionBatch->replacement_issued,
+            'leakage_loss_value' => $leakageLossValue,
+            'gross_profit' => $grossProfit,
+            'net_profit_after_leakage' => $netProfitAfterLeakage,
+            'realized_cash_profit' => $realizedCashProfit,
+            'profit_margin_percent' => $profitMarginPercent,
         ];
 
         return Inertia::render('ProductionBatches/Show', [

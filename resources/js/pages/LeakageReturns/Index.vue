@@ -164,8 +164,8 @@ const confirmDelete = () => {
                     />
                 </div>
                 <div v-else>
-                    <div class="relative overflow-x-auto rounded-md border border-border/40">
-                        <table class="w-full text-left text-sm">
+                    <div class="relative w-full overflow-x-auto rounded-md border border-border/40">
+                        <table class="w-full min-w-[700px] text-left text-sm">
                             <thead class="bg-muted/50 text-xs uppercase text-muted-foreground">
                                 <tr>
                                     <th class="px-4 py-3">Date</th>

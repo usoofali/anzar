@@ -202,8 +202,8 @@ const formatMoney = (amount: number) => {
                     <CardContent class="pt-4">
                         <!-- 1. Batch Performance Report -->
                         <div v-if="currentType === 'batch_performance' && Array.isArray(reportData)" class="space-y-4">
-                            <div class="relative overflow-x-auto">
-                                <table class="w-full text-left text-sm">
+                            <div class="relative w-full overflow-x-auto rounded-md border border-border/40">
+                                <table class="w-full min-w-[700px] text-left text-sm">
                                     <thead class="bg-muted/50 text-xs uppercase text-muted-foreground">
                                         <tr>
                                             <th class="px-3 py-2">Batch No</th>
@@ -216,16 +216,16 @@ const formatMoney = (amount: number) => {
                                             <th class="px-3 py-2 text-center">Status</th>
                                         </tr>
                                     </thead>
-                                    <tbody class="divide-y">
-                                        <tr v-for="row in reportData" :key="row.id || row.batch_no">
-                                            <td class="px-3 py-2 font-semibold text-blue-600">{{ row.batch_no }}</td>
-                                            <td class="px-3 py-2 text-xs text-muted-foreground">{{ formatDate(row.production_date) }}</td>
-                                            <td class="px-3 py-2 text-right font-medium">{{ row.bags_produced }}</td>
-                                            <td class="px-3 py-2 text-right text-emerald-600 font-medium">{{ row.bags_delivered }}</td>
-                                            <td class="px-3 py-2 text-right font-bold">{{ row.remaining_stock }}</td>
-                                            <td class="px-3 py-2 text-right font-semibold">{{ formatMoney(row.total_collected) }}</td>
-                                            <td class="px-3 py-2 text-right font-semibold text-amber-600">{{ formatMoney(row.outstanding_credit) }}</td>
-                                            <td class="px-3 py-2 text-center"><StatusBadge :status="row.status" /></td>
+                                    <tbody class="divide-y divide-border/40">
+                                        <tr v-for="row in reportData" :key="row.id || row.batch_no" class="hover:bg-muted/30">
+                                            <td class="px-3 py-2 font-semibold text-blue-600 dark:text-blue-400 whitespace-nowrap">{{ row.batch_no }}</td>
+                                            <td class="px-3 py-2 text-xs text-muted-foreground whitespace-nowrap">{{ formatDate(row.production_date) }}</td>
+                                            <td class="px-3 py-2 text-right font-medium whitespace-nowrap">{{ row.bags_produced }}</td>
+                                            <td class="px-3 py-2 text-right text-emerald-600 dark:text-emerald-400 font-medium whitespace-nowrap">{{ row.bags_delivered }}</td>
+                                            <td class="px-3 py-2 text-right font-bold whitespace-nowrap">{{ row.remaining_stock }}</td>
+                                            <td class="px-3 py-2 text-right font-semibold whitespace-nowrap">{{ formatMoney(row.total_collected) }}</td>
+                                            <td class="px-3 py-2 text-right font-semibold text-amber-600 dark:text-amber-400 whitespace-nowrap">{{ formatMoney(row.outstanding_credit) }}</td>
+                                            <td class="px-3 py-2 text-center whitespace-nowrap"><StatusBadge :status="row.status" /></td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -234,156 +234,168 @@ const formatMoney = (amount: number) => {
 
                         <!-- 2. Production Summary Report -->
                         <div v-else-if="currentType === 'production' && Array.isArray(reportData)" class="space-y-4">
-                            <table class="w-full text-left text-sm">
-                                <thead class="bg-muted/50 text-xs uppercase text-muted-foreground">
-                                    <tr>
-                                        <th class="px-3 py-2">Batch No</th>
-                                        <th class="px-3 py-2">Date</th>
-                                        <th class="px-3 py-2">Supplier</th>
-                                        <th class="px-3 py-2 text-right">KG Used</th>
-                                        <th class="px-3 py-2 text-right">Bags Produced</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y">
-                                    <tr v-for="(row, idx) in reportData" :key="idx">
-                                        <td class="px-3 py-2 font-semibold">{{ row.batch_no }}</td>
-                                        <td class="px-3 py-2 text-muted-foreground">{{ formatDate(row.production_date) }}</td>
-                                        <td class="px-3 py-2 text-xs">{{ row.supplier || 'N/A' }}</td>
-                                        <td class="px-3 py-2 text-right font-bold">{{ row.nylon_used_kg }} KG</td>
-                                        <td class="px-3 py-2 text-right font-bold text-emerald-600">{{ row.bags_produced }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <div class="relative w-full overflow-x-auto rounded-md border border-border/40">
+                                <table class="w-full min-w-[600px] text-left text-sm">
+                                    <thead class="bg-muted/50 text-xs uppercase text-muted-foreground">
+                                        <tr>
+                                            <th class="px-3 py-2">Batch No</th>
+                                            <th class="px-3 py-2">Date</th>
+                                            <th class="px-3 py-2">Supplier</th>
+                                            <th class="px-3 py-2 text-right">KG Used</th>
+                                            <th class="px-3 py-2 text-right">Bags Produced</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-border/40">
+                                        <tr v-for="(row, idx) in reportData" :key="idx" class="hover:bg-muted/30">
+                                            <td class="px-3 py-2 font-semibold text-foreground whitespace-nowrap">{{ row.batch_no }}</td>
+                                            <td class="px-3 py-2 text-muted-foreground whitespace-nowrap">{{ formatDate(row.production_date) }}</td>
+                                            <td class="px-3 py-2 text-xs whitespace-nowrap">{{ row.supplier || 'N/A' }}</td>
+                                            <td class="px-3 py-2 text-right font-bold whitespace-nowrap">{{ row.nylon_used_kg }} KG</td>
+                                            <td class="px-3 py-2 text-right font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">{{ row.bags_produced }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
 
                         <!-- 3. Delivery Log -->
                         <div v-else-if="currentType === 'delivery' && Array.isArray(reportData)" class="space-y-4">
-                            <table class="w-full text-left text-sm">
-                                <thead class="bg-muted/50 text-xs uppercase text-muted-foreground">
-                                    <tr>
-                                        <th class="px-3 py-2">Delivery No</th>
-                                        <th class="px-3 py-2">Date</th>
-                                        <th class="px-3 py-2">Customer Shop</th>
-                                        <th class="px-3 py-2 text-right">Bags</th>
-                                        <th class="px-3 py-2 text-right">Total (₦)</th>
-                                        <th class="px-3 py-2 text-right">Paid (₦)</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y">
-                                    <tr v-for="(row, idx) in reportData" :key="idx">
-                                        <td class="px-3 py-2 font-mono text-xs">{{ row.delivery_no }}</td>
-                                        <td class="px-3 py-2 text-xs text-muted-foreground">{{ formatDate(row.delivery_date) }}</td>
-                                        <td class="px-3 py-2 font-medium">{{ row.shop_name }}</td>
-                                        <td class="px-3 py-2 text-right font-bold">{{ row.bags_delivered }}</td>
-                                        <td class="px-3 py-2 text-right font-semibold">{{ formatMoney(row.total_amount) }}</td>
-                                        <td class="px-3 py-2 text-right text-emerald-600 font-semibold">{{ formatMoney(row.paid_amount) }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <div class="relative w-full overflow-x-auto rounded-md border border-border/40">
+                                <table class="w-full min-w-[640px] text-left text-sm">
+                                    <thead class="bg-muted/50 text-xs uppercase text-muted-foreground">
+                                        <tr>
+                                            <th class="px-3 py-2">Delivery No</th>
+                                            <th class="px-3 py-2">Date</th>
+                                            <th class="px-3 py-2">Customer Shop</th>
+                                            <th class="px-3 py-2 text-right">Bags</th>
+                                            <th class="px-3 py-2 text-right">Total (₦)</th>
+                                            <th class="px-3 py-2 text-right">Paid (₦)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-border/40">
+                                        <tr v-for="(row, idx) in reportData" :key="idx" class="hover:bg-muted/30">
+                                            <td class="px-3 py-2 font-mono text-xs whitespace-nowrap">{{ row.delivery_no }}</td>
+                                            <td class="px-3 py-2 text-xs text-muted-foreground whitespace-nowrap">{{ formatDate(row.delivery_date) }}</td>
+                                            <td class="px-3 py-2 font-medium text-foreground whitespace-nowrap">{{ row.shop_name }}</td>
+                                            <td class="px-3 py-2 text-right font-bold whitespace-nowrap">{{ row.bags_delivered }}</td>
+                                            <td class="px-3 py-2 text-right font-semibold whitespace-nowrap">{{ formatMoney(row.total_amount) }}</td>
+                                            <td class="px-3 py-2 text-right text-emerald-600 dark:text-emerald-400 font-semibold whitespace-nowrap">{{ formatMoney(row.paid_amount) }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
 
                         <!-- 4. Daily Collections Report -->
                         <div v-else-if="currentType === 'daily_collection' && Array.isArray(reportData)" class="space-y-4">
-                            <table class="w-full text-left text-sm">
-                                <thead class="bg-muted/50 text-xs uppercase text-muted-foreground">
-                                    <tr>
-                                        <th class="px-3 py-2">Date</th>
-                                        <th class="px-3 py-2">Batch</th>
-                                        <th class="px-3 py-2 text-right">Cash (₦)</th>
-                                        <th class="px-3 py-2 text-right">Transfer (₦)</th>
-                                        <th class="px-3 py-2 text-right">Total (₦)</th>
-                                        <th class="px-3 py-2">Remarks</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y">
-                                    <tr v-for="(row, idx) in reportData" :key="idx">
-                                        <td class="px-3 py-2 text-muted-foreground">{{ formatDate(row.collection_date) }}</td>
-                                        <td class="px-3 py-2 font-semibold text-blue-600">{{ row.batch_no }}</td>
-                                        <td class="px-3 py-2 text-right font-medium">{{ formatMoney(row.cash_amount) }}</td>
-                                        <td class="px-3 py-2 text-right font-medium">{{ formatMoney(row.transfer_amount) }}</td>
-                                        <td class="px-3 py-2 text-right font-bold text-emerald-600">{{ formatMoney(row.total_collection) }}</td>
-                                        <td class="px-3 py-2 text-xs text-muted-foreground">{{ row.remarks || 'N/A' }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <div class="relative w-full overflow-x-auto rounded-md border border-border/40">
+                                <table class="w-full min-w-[640px] text-left text-sm">
+                                    <thead class="bg-muted/50 text-xs uppercase text-muted-foreground">
+                                        <tr>
+                                            <th class="px-3 py-2">Date</th>
+                                            <th class="px-3 py-2">Batch</th>
+                                            <th class="px-3 py-2 text-right">Cash (₦)</th>
+                                            <th class="px-3 py-2 text-right">Transfer (₦)</th>
+                                            <th class="px-3 py-2 text-right">Total (₦)</th>
+                                            <th class="px-3 py-2">Remarks</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-border/40">
+                                        <tr v-for="(row, idx) in reportData" :key="idx" class="hover:bg-muted/30">
+                                            <td class="px-3 py-2 text-muted-foreground whitespace-nowrap">{{ formatDate(row.collection_date) }}</td>
+                                            <td class="px-3 py-2 font-semibold text-blue-600 dark:text-blue-400 whitespace-nowrap">{{ row.batch_no }}</td>
+                                            <td class="px-3 py-2 text-right font-medium whitespace-nowrap">{{ formatMoney(row.cash_amount) }}</td>
+                                            <td class="px-3 py-2 text-right font-medium whitespace-nowrap">{{ formatMoney(row.transfer_amount) }}</td>
+                                            <td class="px-3 py-2 text-right font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">{{ formatMoney(row.total_collection) }}</td>
+                                            <td class="px-3 py-2 text-xs text-muted-foreground whitespace-nowrap">{{ row.remarks || 'N/A' }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
 
                         <!-- 5. Outstanding Customers Credit Log -->
                         <div v-else-if="currentType === 'outstanding_customers' && Array.isArray(reportData)" class="space-y-4">
-                            <table class="w-full text-left text-sm">
-                                <thead class="bg-muted/50 text-xs uppercase text-muted-foreground">
-                                    <tr>
-                                        <th class="px-3 py-2">Customer Shop</th>
-                                        <th class="px-3 py-2">Owner & Phone</th>
-                                        <th class="px-3 py-2">Batch</th>
-                                        <th class="px-3 py-2">Delivery Date</th>
-                                        <th class="px-3 py-2 text-right">Outstanding Debt (₦)</th>
-                                        <th class="px-3 py-2 text-center">Age</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y">
-                                    <tr v-for="(row, idx) in reportData" :key="idx">
-                                        <td class="px-3 py-2 font-semibold">{{ row.shop_name }}</td>
-                                        <td class="px-3 py-2 text-xs text-muted-foreground">{{ row.owner_name }} ({{ row.phone }})</td>
-                                        <td class="px-3 py-2 text-xs font-semibold text-blue-600">{{ row.batch_no }}</td>
-                                        <td class="px-3 py-2 text-xs text-muted-foreground">{{ formatDate(row.delivery_date) }}</td>
-                                        <td class="px-3 py-2 text-right font-bold text-amber-600">{{ formatMoney(row.outstanding_amount) }}</td>
-                                        <td class="px-3 py-2 text-center text-xs font-medium">{{ row.age_days }} Days</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <div class="relative w-full overflow-x-auto rounded-md border border-border/40">
+                                <table class="w-full min-w-[700px] text-left text-sm">
+                                    <thead class="bg-muted/50 text-xs uppercase text-muted-foreground">
+                                        <tr>
+                                            <th class="px-3 py-2">Customer Shop</th>
+                                            <th class="px-3 py-2">Owner & Phone</th>
+                                            <th class="px-3 py-2">Batch</th>
+                                            <th class="px-3 py-2">Delivery Date</th>
+                                            <th class="px-3 py-2 text-right">Outstanding Debt (₦)</th>
+                                            <th class="px-3 py-2 text-center">Age</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-border/40">
+                                        <tr v-for="(row, idx) in reportData" :key="idx" class="hover:bg-muted/30">
+                                            <td class="px-3 py-2 font-semibold text-foreground whitespace-nowrap">{{ row.shop_name }}</td>
+                                            <td class="px-3 py-2 text-xs text-muted-foreground whitespace-nowrap">{{ row.owner_name }} ({{ row.phone }})</td>
+                                            <td class="px-3 py-2 text-xs font-semibold text-blue-600 dark:text-blue-400 whitespace-nowrap">{{ row.batch_no }}</td>
+                                            <td class="px-3 py-2 text-xs text-muted-foreground whitespace-nowrap">{{ formatDate(row.delivery_date) }}</td>
+                                            <td class="px-3 py-2 text-right font-bold text-amber-600 dark:text-amber-400 whitespace-nowrap">{{ formatMoney(row.outstanding_amount) }}</td>
+                                            <td class="px-3 py-2 text-center text-xs font-medium whitespace-nowrap">{{ row.age_days }} Days</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
 
                         <!-- 6. Leakage Returns Report -->
                         <div v-else-if="currentType === 'leakage' && Array.isArray(reportData)" class="space-y-4">
-                            <table class="w-full text-left text-sm">
-                                <thead class="bg-muted/50 text-xs uppercase text-muted-foreground">
-                                    <tr>
-                                        <th class="px-3 py-2">Date</th>
-                                        <th class="px-3 py-2">Customer Shop</th>
-                                        <th class="px-3 py-2">Batch</th>
-                                        <th class="px-3 py-2 text-right">Leaked (Pieces)</th>
-                                        <th class="px-3 py-2 text-right">Replacement Issued</th>
-                                        <th class="px-3 py-2">Remarks</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y">
-                                    <tr v-for="(row, idx) in reportData" :key="idx">
-                                        <td class="px-3 py-2 text-xs text-muted-foreground">{{ formatDate(row.date) }}</td>
-                                        <td class="px-3 py-2 font-semibold">{{ row.shop_name }}</td>
-                                        <td class="px-3 py-2 font-medium text-blue-600">{{ row.batch_no }}</td>
-                                        <td class="px-3 py-2 text-right font-bold text-rose-600">{{ row.returned_pieces }} Pcs</td>
-                                        <td class="px-3 py-2 text-right font-bold text-blue-600">{{ row.replacement_issued }} Pcs</td>
-                                        <td class="px-3 py-2 text-xs text-muted-foreground">{{ row.remarks || 'N/A' }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <div class="relative w-full overflow-x-auto rounded-md border border-border/40">
+                                <table class="w-full min-w-[640px] text-left text-sm">
+                                    <thead class="bg-muted/50 text-xs uppercase text-muted-foreground">
+                                        <tr>
+                                            <th class="px-3 py-2">Date</th>
+                                            <th class="px-3 py-2">Customer Shop</th>
+                                            <th class="px-3 py-2">Batch</th>
+                                            <th class="px-3 py-2 text-right">Leaked (Pieces)</th>
+                                            <th class="px-3 py-2 text-right">Replacement Issued</th>
+                                            <th class="px-3 py-2">Remarks</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-border/40">
+                                        <tr v-for="(row, idx) in reportData" :key="idx" class="hover:bg-muted/30">
+                                            <td class="px-3 py-2 text-xs text-muted-foreground whitespace-nowrap">{{ formatDate(row.date) }}</td>
+                                            <td class="px-3 py-2 font-semibold text-foreground whitespace-nowrap">{{ row.shop_name }}</td>
+                                            <td class="px-3 py-2 font-medium text-blue-600 dark:text-blue-400 whitespace-nowrap">{{ row.batch_no }}</td>
+                                            <td class="px-3 py-2 text-right font-bold text-rose-600 dark:text-rose-400 whitespace-nowrap">{{ row.returned_pieces }} Pcs</td>
+                                            <td class="px-3 py-2 text-right font-bold text-blue-600 dark:text-blue-400 whitespace-nowrap">{{ row.replacement_issued }} Pcs</td>
+                                            <td class="px-3 py-2 text-xs text-muted-foreground whitespace-nowrap">{{ row.remarks || 'N/A' }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
 
                         <!-- 7. Operational Expenses Summary -->
                         <div v-else-if="currentType === 'expense' && Array.isArray(reportData)" class="space-y-4">
-                            <table class="w-full text-left text-sm">
-                                <thead class="bg-muted/50 text-xs uppercase text-muted-foreground">
-                                    <tr>
-                                        <th class="px-3 py-2">Date</th>
-                                        <th class="px-3 py-2">Category</th>
-                                        <th class="px-3 py-2">Description</th>
-                                        <th class="px-3 py-2 text-right">Amount (₦)</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y">
-                                    <tr v-for="(row, idx) in reportData" :key="idx">
-                                        <td class="px-3 py-2 text-xs text-muted-foreground">{{ formatDate(row.expense_date) }}</td>
-                                        <td class="px-3 py-2">
-                                            <span class="inline-flex items-center rounded-md bg-purple-50 px-2 py-0.5 text-xs font-semibold text-purple-700 dark:bg-purple-950/50 dark:text-purple-300">
-                                                {{ row.category }}
-                                            </span>
-                                        </td>
-                                        <td class="px-3 py-2 font-medium">{{ row.description }}</td>
-                                        <td class="px-3 py-2 text-right font-bold text-rose-600">{{ formatMoney(row.amount) }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <div class="relative w-full overflow-x-auto rounded-md border border-border/40">
+                                <table class="w-full min-w-[600px] text-left text-sm">
+                                    <thead class="bg-muted/50 text-xs uppercase text-muted-foreground">
+                                        <tr>
+                                            <th class="px-3 py-2">Date</th>
+                                            <th class="px-3 py-2">Category</th>
+                                            <th class="px-3 py-2">Description</th>
+                                            <th class="px-3 py-2 text-right">Amount (₦)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-border/40">
+                                        <tr v-for="(row, idx) in reportData" :key="idx" class="hover:bg-muted/30">
+                                            <td class="px-3 py-2 text-xs text-muted-foreground whitespace-nowrap">{{ formatDate(row.expense_date) }}</td>
+                                            <td class="px-3 py-2 whitespace-nowrap">
+                                                <span class="inline-flex items-center rounded-md bg-purple-50 px-2 py-0.5 text-xs font-semibold text-purple-700 dark:bg-purple-950/50 dark:text-purple-300">
+                                                    {{ row.category }}
+                                                </span>
+                                            </td>
+                                            <td class="px-3 py-2 font-medium text-foreground whitespace-nowrap">{{ row.description }}</td>
+                                            <td class="px-3 py-2 text-right font-bold text-rose-600 dark:text-rose-400 whitespace-nowrap">{{ formatMoney(row.amount) }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
 
                         <!-- 8. Customer Account Statement -->
@@ -393,30 +405,32 @@ const formatMoney = (amount: number) => {
                                 <p class="text-xs text-muted-foreground">{{ reportData.customer.owner_name }} • {{ reportData.customer.phone }} • {{ reportData.customer.address }}</p>
                                 <p class="text-sm font-semibold text-amber-600 pt-1">Total Account Debt: {{ formatMoney(reportData.customer.total_outstanding) }}</p>
                             </div>
-                            <table v-if="reportData?.deliveries?.length" class="w-full text-left text-sm">
-                                <thead class="bg-muted/50 text-xs uppercase text-muted-foreground">
-                                    <tr>
-                                        <th class="px-3 py-2">Delivery No</th>
-                                        <th class="px-3 py-2">Date</th>
-                                        <th class="px-3 py-2">Batch</th>
-                                        <th class="px-3 py-2 text-right">Bags</th>
-                                        <th class="px-3 py-2 text-right">Total (₦)</th>
-                                        <th class="px-3 py-2 text-right">Paid (₦)</th>
-                                        <th class="px-3 py-2 text-right">Debt Balance (₦)</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y">
-                                    <tr v-for="(row, idx) in reportData.deliveries" :key="idx">
-                                        <td class="px-3 py-2 font-mono text-xs">{{ row.delivery_no }}</td>
-                                        <td class="px-3 py-2 text-xs text-muted-foreground">{{ formatDate(row.delivery_date) }}</td>
-                                        <td class="px-3 py-2 font-semibold text-blue-600">{{ row.batch_no }}</td>
-                                        <td class="px-3 py-2 text-right font-medium">{{ row.bags_delivered }}</td>
-                                        <td class="px-3 py-2 text-right font-semibold">{{ formatMoney(row.total_amount) }}</td>
-                                        <td class="px-3 py-2 text-right text-emerald-600 font-semibold">{{ formatMoney(row.paid_amount) }}</td>
-                                        <td class="px-3 py-2 text-right font-bold text-amber-600">{{ formatMoney(row.outstanding_amount) }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <div v-if="reportData?.deliveries?.length" class="relative w-full overflow-x-auto rounded-md border border-border/40">
+                                <table class="w-full min-w-[700px] text-left text-sm">
+                                    <thead class="bg-muted/50 text-xs uppercase text-muted-foreground">
+                                        <tr>
+                                            <th class="px-3 py-2">Delivery No</th>
+                                            <th class="px-3 py-2">Date</th>
+                                            <th class="px-3 py-2">Batch</th>
+                                            <th class="px-3 py-2 text-right">Bags</th>
+                                            <th class="px-3 py-2 text-right">Total (₦)</th>
+                                            <th class="px-3 py-2 text-right">Paid (₦)</th>
+                                            <th class="px-3 py-2 text-right">Debt Balance (₦)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-border/40">
+                                        <tr v-for="(row, idx) in reportData.deliveries" :key="idx" class="hover:bg-muted/30">
+                                            <td class="px-3 py-2 font-mono text-xs whitespace-nowrap">{{ row.delivery_no }}</td>
+                                            <td class="px-3 py-2 text-xs text-muted-foreground whitespace-nowrap">{{ formatDate(row.delivery_date) }}</td>
+                                            <td class="px-3 py-2 font-semibold text-blue-600 dark:text-blue-400 whitespace-nowrap">{{ row.batch_no }}</td>
+                                            <td class="px-3 py-2 text-right font-medium whitespace-nowrap">{{ row.bags_delivered }}</td>
+                                            <td class="px-3 py-2 text-right font-semibold whitespace-nowrap">{{ formatMoney(row.total_amount) }}</td>
+                                            <td class="px-3 py-2 text-right text-emerald-600 dark:text-emerald-400 font-semibold whitespace-nowrap">{{ formatMoney(row.paid_amount) }}</td>
+                                            <td class="px-3 py-2 text-right font-bold text-amber-600 dark:text-amber-400 whitespace-nowrap">{{ formatMoney(row.outstanding_amount) }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </CardContent>
                 </Card>

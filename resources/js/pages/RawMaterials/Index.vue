@@ -105,12 +105,10 @@ const openDeleteModal = (p: PurchaseItem) => {
 const confirmDelete = () => {
     if (!deletingPurchase.value) return;
     router.delete(`/raw-materials/${deletingPurchase.value.id}`, {
-        onSuccess: () => {
+        onFinish: () => {
             isDeleteModalOpen.value = false;
             deletingPurchase.value = null;
-            toast.success('Purchase record deleted successfully.');
         },
-        onError: (err: any) => toast.error(err.message || 'Cannot delete purchase.'),
     });
 };
 
@@ -122,14 +120,14 @@ const formatMoney = (amount: number) => {
 <template>
     <Head title="Raw Material Purchases - ANZAR Table Water" />
 
-    <div class="space-y-6 p-6">
+    <div class="space-y-4 sm:space-y-6 p-4 sm:p-6">
         <!-- Header Banner -->
-        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 class="text-2xl font-bold tracking-tight text-foreground">Packaging Nylon Purchases</h1>
-                <p class="text-sm text-muted-foreground">Record and trace raw material nylon purchases in kilograms.</p>
+                <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-foreground">Packaging Nylon Purchases</h1>
+                <p class="text-xs sm:text-sm text-muted-foreground">Record and trace raw material nylon purchases in kilograms.</p>
             </div>
-            <Button class="gap-1.5 bg-blue-600 hover:bg-blue-700" @click="openModal">
+            <Button class="w-full sm:w-auto justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 shrink-0" @click="openModal">
                 <Plus class="h-4 w-4" /> Record Nylon Purchase
             </Button>
         </div>
@@ -160,8 +158,8 @@ const formatMoney = (amount: number) => {
                     />
                 </div>
                 <div v-else>
-                    <div class="relative overflow-x-auto rounded-md border border-border/40">
-                        <table class="w-full text-left text-sm">
+                    <div class="relative w-full overflow-x-auto rounded-md border border-border/40">
+                        <table class="w-full min-w-[640px] text-left text-sm">
                             <thead class="bg-muted/50 text-xs uppercase text-muted-foreground">
                                 <tr>
                                     <th class="px-4 py-3">Purchase No</th>

@@ -47,14 +47,19 @@ class RawMaterialPurchaseController extends Controller
         return back()->with('success', 'Raw material purchase recorded successfully.');
     }
 
-    public function destroy(RawMaterialPurchase $purchase): RedirectResponse
+    public function destroy(RawMaterialPurchase $rawMaterialPurchase): RedirectResponse
     {
-        if ($purchase->productionBatch()->exists()) {
-            return back()->with('error', 'Cannot delete purchase that is already linked to a production batch.');
+        $batch = $rawMaterialPurchase->productionBatch;
+
+        if ($batch) {
+            if ($batch->deliveries()->exists()) {
+                return back()->with('error', "Cannot delete purchase {$rawMaterialPurchase->purchase_no}: linked batch {$batch->batch_no} already has recorded deliveries.");
+            }
+            $batch->delete();
         }
 
-        $purchase->delete();
+        $rawMaterialPurchase->delete();
 
-        return back()->with('success', 'Raw material purchase deleted successfully.');
+        return back()->with('success', "Raw material purchase {$rawMaterialPurchase->purchase_no} deleted successfully.");
     }
 }

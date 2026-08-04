@@ -80,10 +80,10 @@ const navGroups = [
     },
     {
         label: 'Management',
-        show: true,
+        show: isManager,
         items: [
             { title: 'Reports & Analytics', href: '/reports', icon: BarChart3 },
-            ...(isManager ? [{ title: 'User Management', href: '/users', icon: Users }] : []),
+            { title: 'User Management', href: '/users', icon: Users },
         ],
     },
 ];

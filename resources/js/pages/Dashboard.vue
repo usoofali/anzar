@@ -51,6 +51,14 @@ interface Props {
 
 const props = defineProps<Props>();
 
+import { usePage } from '@inertiajs/vue3';
+
+const page = usePage();
+const user = page.props.auth?.user;
+const isManager = !user?.role || user?.role === 'manager';
+const isProduction = isManager || user?.role === 'production_staff';
+const isSales = isManager || user?.role === 'sales_staff';
+
 const formatMoney = (amount: number) => {
     return '₦' + (amount || 0).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
@@ -67,12 +75,12 @@ const formatMoney = (amount: number) => {
                 <p class="text-sm text-muted-foreground">Real-time production batch tracking, sales, debt collections, and quality control.</p>
             </div>
             <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                <Link href="/production-batches" class="w-full sm:w-auto">
+                <Link v-if="isProduction" href="/production-batches" class="w-full sm:w-auto">
                     <Button class="gap-1.5 bg-blue-600 hover:bg-blue-700 w-full sm:w-auto">
                         <Factory class="h-4 w-4" /> New Batch
                     </Button>
                 </Link>
-                <Link href="/deliveries" class="w-full sm:w-auto">
+                <Link v-if="isSales" href="/deliveries" class="w-full sm:w-auto">
                     <Button variant="outline" class="gap-1.5 w-full sm:w-auto">
                         <PackageCheck class="h-4 w-4" /> Record Delivery
                     </Button>
@@ -83,7 +91,7 @@ const formatMoney = (amount: number) => {
         <!-- Top Metric Cards Grid -->
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <!-- Production Card -->
-            <Card class="relative overflow-hidden border-emerald-500/20 bg-gradient-to-br from-emerald-500/5 to-transparent">
+            <Card v-if="isProduction" class="relative overflow-hidden border-emerald-500/20 bg-gradient-to-br from-emerald-500/5 to-transparent">
                 <CardHeader class="flex flex-row items-center justify-between pb-2">
                     <CardTitle class="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
                         Today's Production
@@ -104,7 +112,7 @@ const formatMoney = (amount: number) => {
             </Card>
 
             <!-- Daily Collections Card -->
-            <Card class="relative overflow-hidden border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-transparent">
+            <Card v-if="isSales" class="relative overflow-hidden border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-transparent">
                 <CardHeader class="flex flex-row items-center justify-between pb-2">
                     <CardTitle class="text-xs font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400">
                         Today's Collections
@@ -125,7 +133,7 @@ const formatMoney = (amount: number) => {
             </Card>
 
             <!-- Receivables Card -->
-            <Card class="relative overflow-hidden border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-transparent">
+            <Card v-if="isSales" class="relative overflow-hidden border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-transparent">
                 <CardHeader class="flex flex-row items-center justify-between pb-2">
                     <CardTitle class="text-xs font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400">
                         Outstanding Credit
@@ -174,7 +182,7 @@ const formatMoney = (amount: number) => {
             <!-- Main Activity Column (2 cols) -->
             <div class="space-y-6 lg:col-span-2">
                 <!-- Active Batches Summary -->
-                <Card>
+                <Card v-if="isProduction">
                     <CardHeader class="flex flex-row items-center justify-between">
                         <div>
                             <CardTitle class="text-base">Active Production Batches</CardTitle>
@@ -195,8 +203,8 @@ const formatMoney = (amount: number) => {
                                 @action="$inertia.visit('/production-batches')"
                             />
                         </div>
-                        <div v-else class="relative overflow-x-auto">
-                            <table class="w-full text-left text-sm">
+                        <div v-else class="relative w-full overflow-x-auto rounded-md border border-border/40">
+                            <table class="w-full min-w-[600px] text-left text-sm">
                                 <thead class="bg-muted/50 text-xs uppercase text-muted-foreground">
                                     <tr>
                                         <th class="px-4 py-3">Batch No</th>
@@ -207,18 +215,18 @@ const formatMoney = (amount: number) => {
                                         <th class="px-4 py-3 text-center">Status</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y">
+                                <tbody class="divide-y divide-border/40">
                                     <tr v-for="batch in activeBatches" :key="batch.id" class="hover:bg-muted/30">
-                                        <td class="px-4 py-3 font-semibold text-blue-600">
+                                        <td class="px-4 py-3 font-semibold text-blue-600 dark:text-blue-400 whitespace-nowrap">
                                             <Link :href="`/production-batches/${batch.id}`" class="hover:underline">
                                                 {{ batch.batch_no }}
                                             </Link>
                                         </td>
-                                        <td class="px-4 py-3 text-muted-foreground">{{ formatDate(batch.production_date) }}</td>
-                                        <td class="px-4 py-3 text-right font-medium">{{ batch.bags_produced }}</td>
-                                        <td class="px-4 py-3 text-right text-emerald-600 font-medium">{{ batch.bags_delivered }}</td>
-                                        <td class="px-4 py-3 text-right font-semibold">{{ batch.remaining_stock }}</td>
-                                        <td class="px-4 py-3 text-center">
+                                        <td class="px-4 py-3 text-muted-foreground whitespace-nowrap">{{ formatDate(batch.production_date) }}</td>
+                                        <td class="px-4 py-3 text-right font-medium whitespace-nowrap">{{ batch.bags_produced }}</td>
+                                        <td class="px-4 py-3 text-right text-emerald-600 dark:text-emerald-400 font-medium whitespace-nowrap">{{ batch.bags_delivered }}</td>
+                                        <td class="px-4 py-3 text-right font-semibold whitespace-nowrap">{{ batch.remaining_stock }}</td>
+                                        <td class="px-4 py-3 text-center whitespace-nowrap">
                                             <StatusBadge :status="batch.status" />
                                         </td>
                                     </tr>
@@ -229,7 +237,7 @@ const formatMoney = (amount: number) => {
                 </Card>
 
                 <!-- Recent Deliveries Table -->
-                <Card>
+                <Card v-if="isSales">
                     <CardHeader class="flex flex-row items-center justify-between">
                         <div>
                             <CardTitle class="text-base">Recent Deliveries</CardTitle>
@@ -245,8 +253,8 @@ const formatMoney = (amount: number) => {
                         <div v-if="recentDeliveries.length === 0">
                             <EmptyState title="No Recent Deliveries" description="Record deliveries when products leave the factory." />
                         </div>
-                        <div v-else class="relative overflow-x-auto">
-                            <table class="w-full text-left text-sm">
+                        <div v-else class="relative w-full overflow-x-auto rounded-md border border-border/40">
+                            <table class="w-full min-w-[600px] text-left text-sm">
                                 <thead class="bg-muted/50 text-xs uppercase text-muted-foreground">
                                     <tr>
                                         <th class="px-4 py-3">Delivery No</th>
@@ -272,7 +280,7 @@ const formatMoney = (amount: number) => {
             </div>
 
             <!-- Side Widget Column (1 col) -->
-            <div class="space-y-6">
+            <div v-if="isSales" class="space-y-6">
                 <!-- Customers Owing Widget -->
                 <Card>
                     <CardHeader class="flex flex-row items-center justify-between pb-3">
